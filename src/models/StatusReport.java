@@ -1,0 +1,39 @@
+package models;
+
+import services.*;
+
+/**
+ * Utility class for generating status reports
+ * Demonstrates separation of reporting logic
+ */
+public class StatusReport {
+    private String reportId;
+    private String reportDate;
+    private ProjectServices projectService;
+    private TaskService taskService;
+
+    public StatusReport(String reportId, String reportDate,
+                        ProjectServices projectService, TaskService taskService) {
+        this.reportId = reportId;
+        this.reportDate = reportDate;
+        this.projectService = projectService;
+        this.taskService = taskService;
+    }
+
+    /**
+     * Generate and display formatted status report
+     */
+    public void generate() {
+        System.out.println("\n" + "╔".repeat(70));
+        System.out.println("              STATUS REPORT - " + reportDate);
+        System.out.println("╚".repeat(70));
+        System.out.println("Report ID: " + reportId);
+
+        // Summary statistics
+        System.out.println("\n📊 SUMMARY:");
+        System.out.printf("  Projects: %d | Tasks: %d%n",
+                projectService.getProjectCount(), taskService.getTaskCount());
+        System.out.printf("  Avg Project Completion: %.2f%%%n",
+                projectService.getAverageCompletion());
+    }
+}
