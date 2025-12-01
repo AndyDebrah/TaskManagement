@@ -146,8 +146,3 @@ Manual tests to perform before publishing:
 - Replace fixed-size arrays with `List<>`/Collections for scalability.
 - Add persistent storage (file-based or DB) for real-data scenarios.
 - Produce an image of the UML class diagram in `docs/` for repo display.
-
-## License
-
-Choose and add an appropriate open-source license if you plan to publish the code.
-
