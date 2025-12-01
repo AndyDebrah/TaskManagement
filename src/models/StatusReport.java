@@ -24,16 +24,11 @@ public class StatusReport {
      * Generate and display formatted status report
      */
     public void generate() {
-        System.out.println("\n" + "╔".repeat(70));
-        System.out.println("              STATUS REPORT - " + reportDate);
-        System.out.println("╚".repeat(70));
+        System.out.println("STATUS REPORT - " + reportDate);
         System.out.println("Report ID: " + reportId);
 
-        // Summary statistics
-        System.out.println("\n📊 SUMMARY:");
-        System.out.printf("  Projects: %d | Tasks: %d%n",
+        System.out.printf("Projects: %d | Tasks: %d%n",
                 projectService.getProjectCount(), taskService.getTaskCount());
-        System.out.printf("  Avg Project Completion: %.2f%%%n",
-                projectService.getAverageCompletion());
+        System.out.printf("Avg Project Completion: %.2f%%%n", projectService.getAverageCompletion());
     }
 }

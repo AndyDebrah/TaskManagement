@@ -1,0 +1,69 @@
+%% Class diagram for TaskManagement
+
+classDiagram
+    class Project {
+        - String projectId
+        - String projectName
+        - String description
+        - String startDate
+        - String endDate
+        - String status
+        - double budget
+        - int teamSize
+        + double calculateCompletionPercentage()
+        + String getProjectType()
+        + String getProjectDetails()
+        + void displayProjectInfo()
+    }
+
+    class SoftwareProject {
+        - String technologyStack
+        - String methodology
+        - int totalFeatures
+        - int completedFeatures
+        + boolean completeFeature()
+    }
+
+    class HardwareProject {
+        - String hardwareType
+        - int totalComponents
+        - int assembledComponents
+        - boolean prototypeCompleted
+        + boolean assembleComponent()
+        + void completePrototype()
+    }
+
+    class Task {
+        - String taskId
+        - String projectId
+        - String taskName
+        - String description
+        - String assignedTo
+        - String priority
+        - String status
+        - String dueDate
+        + boolean markAsCompleted()
+    }
+
+    class User {
+        - String userId
+        - String userName
+        - String email
+        - String role
+        - String password
+        + String[] getPermissions()
+        + boolean hasPermission(String action)
+    }
+
+    class AdminUser
+    class RegularUser
+
+    Project <|-- SoftwareProject
+    Project <|-- HardwareProject
+    Task --> Project : belongsTo
+    User <|-- AdminUser
+    User <|-- RegularUser
+
+%% Short rationale
+%% Abstraction, Inheritance, Polymorphism, Encapsulation illustrated
+
