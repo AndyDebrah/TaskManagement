@@ -140,9 +140,3 @@ Manual tests to perform before publishing:
 - Generate reports and verify counts/percentages.
 - Edge cases: duplicate IDs, empty inputs, invalid dates (ValidationUtils validates format).
 
-## Next steps (optional)
-
-- Add a build tool (Maven/Gradle) and unit tests for services.
-- Replace fixed-size arrays with `List<>`/Collections for scalability.
-- Add persistent storage (file-based or DB) for real-data scenarios.
-- Produce an image of the UML class diagram in `docs/` for repo display.
