@@ -16,7 +16,7 @@ public class ConsoleMenu {
     private ProjectServices projectService;
     private TaskService taskService;
     private ReportService reportService;
-    private User currentUser;
+    private static User currentUser;
 
     public ConsoleMenu(ProjectServices projectService, TaskService taskService,
                        ReportService reportService, Scanner scanner) {
@@ -24,10 +24,6 @@ public class ConsoleMenu {
         this.projectService = projectService;
         this.taskService = taskService;
         this.reportService = reportService;
-    }
-
-    public void setCurrentUser(User user) {
-        this.currentUser = user;
     }
 
     public void displayMainMenu() {
@@ -38,6 +34,7 @@ public class ConsoleMenu {
         System.out.println("3.  User Management");
         System.out.println("4.  Reports & Analytics");
         System.out.println("5.  System Statistics");
+        System.out.println("6. Switch User");
         System.out.println("0.  Exit");
         System.out.println("=======================================================================");
     }
@@ -115,6 +112,22 @@ public class ConsoleMenu {
     public void clearScreen() {
         for (int i = 0; i < 50; i++) {
             System.out.println();
+        }
+    }
+
+    public static User getCurrentUser() {
+        return currentUser;
+    }
+
+    public static void setCurrentUser(User user) {
+        currentUser = user;
+    }
+
+    // TODO: check it out
+    public static void requirePermission(String permission) {
+        if (!currentUser.hasPermission(permission)) {
+            System.out.println("Error: You do not have permission to perform this action.");
+            throw new SecurityException("Insufficient permissions");
         }
     }
 }

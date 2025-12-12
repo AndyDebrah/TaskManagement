@@ -7,12 +7,13 @@ public class SoftwareProject extends Project {
     private int totalFeatures;
     private int completedFeatures;
 
-    public SoftwareProject(String projectId, String projectName, String description,
+    public SoftwareProject(String projectName, String description,
                            String startDate, String endDate, double budget, int teamSize,
                            String technologyStack, String methodology, int totalFeatures) {
-        super(projectId, projectName, description, startDate, endDate, budget, teamSize);
+        super( projectName, description, startDate, endDate, budget, teamSize);
         this.technologyStack = technologyStack;
         this.methodology = methodology;
+
         this.totalFeatures = totalFeatures;
         this.completedFeatures = 0;
     }

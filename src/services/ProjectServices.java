@@ -2,6 +2,7 @@ package services;
 
 import models.Project;
 
+
 /** Service class for managing project operations (in-memory). */
 public class ProjectServices {
     private Project[] projects;
@@ -11,6 +12,16 @@ public class ProjectServices {
     public ProjectServices() {
         this.projects = new Project[MAX_PROJECTS];
         this.projectCount = 0;
+    }
+
+    public  ProjectServices(Project[] seededProjects) {
+        this.projects = new Project[MAX_PROJECTS];
+        this.projectCount = 0;
+        for (Project project : seededProjects) {
+            if (project != null) {
+                this.projects[projectCount++] = project;
+            }
+        }
     }
 
     public boolean addProject(Project project) {

@@ -7,10 +7,10 @@ public class HardwareProject extends Project {
     private int assembledComponents;
     private boolean prototypeCompleted;
 
-    public HardwareProject(String projectId, String projectName, String description,
+    public HardwareProject(String projectName, String description,
                            String startDate, String endDate, double budget, int teamSize,
                            String hardwareType, int totalComponents) {
-        super(projectId, projectName, description, startDate, endDate, budget, teamSize);
+        super( projectName, description, startDate, endDate, budget, teamSize);
         this.hardwareType = hardwareType;
         this.totalComponents = totalComponents;
         this.assembledComponents = 0;

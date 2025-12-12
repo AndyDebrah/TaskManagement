@@ -1,0 +1,46 @@
+
+================ Welcome to Project Management System ================
+A small console application to manage projects and tasks.
+======================================================================
+
+Loading sample data...
+Project added successfully.
+Project added successfully.
+Project added successfully.
+Task added successfully.
+Task added successfully.
+Task added successfully.
+Task added successfully.
+Task added successfully.
+Sample data loaded: 3 projects, 5 tasks.
+
+AUTHENTICATION
+Login as:
+1. Administrator
+2. Regular User
+Select user type (1-2): Logged in as Administrator
+User ID: ADM001
+Name   : Admin User
+Email  : admin@projectmgmt.com
+Role   : Administrator
+Administrator Statistics:
+  Projects Created : 0
+  Users Managed    : 0
+  Access Level     : FULL SYSTEM ACCESS
+
+
+Press Enter to continue...
+
+================= PROJECT MANAGEMENT SYSTEM - MAIN MENU =================
+1.  Project Management
+2.  Task Management
+3.  User Management
+4.  Reports & Analytics
+5.  System Statistics
+0.  Exit
+=======================================================================
+Enter your choice: 
+======================================================================
+Thank you for using Project Management System. Goodbye!
+======================================================================
+

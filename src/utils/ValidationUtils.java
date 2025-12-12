@@ -5,7 +5,7 @@ import java.util.Scanner;
 /**
  * Utility class for input validation
  * Demonstrates validation best practices and error handling
- *
+
  * This class provides reusable validation methods to ensure
  * data integrity throughout the application
  */

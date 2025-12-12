@@ -1,3 +1,4 @@
+
 import models.AdminUser;
 import models.HardwareProject;
 import models.Project;
@@ -9,14 +10,10 @@ import services.ProjectServices;
 import services.ReportService;
 import services.TaskService;
 import utils.ConsoleMenu;
+import utils.Seed;
 import utils.ValidationUtils;
 import java.util.Scanner;
 
-/**
- * Console-based Project & Task Management application entry point.
- * Cleaned and organized for publication: unnecessary comments removed
- * and formatting standardized. The program behavior is unchanged.
- */
 public class Main {
     private static ProjectServices projectService;
     private static TaskService taskService;
@@ -25,8 +22,6 @@ public class Main {
     private static ConsoleMenu menu;
     private static Scanner scanner;
 
-    private static User currentUser;
-
     public static void main(String[] args) {
         initializeServices();
 
@@ -34,8 +29,8 @@ public class Main {
         menu = new ConsoleMenu(projectService, taskService, reportService, scanner);
 
         menu.displayWelcomeBanner();
-        loadSampleData();
         simulateLogin();
+        loadSampleData();
         runApplication();
 
         scanner.close();
@@ -49,77 +44,37 @@ public class Main {
     }
 
     private static void loadSampleData() {
-        System.out.println("\nLoading sample data...");
+        try {
+            System.out.println("\nLoading sample data...");
 
-        SoftwareProject swProject1 = new SoftwareProject(
-                "PROJ001",
-                "E-Commerce Platform",
-                "Online shopping platform with payment integration",
-                "2025-01-01",
-                "2025-06-30",
-                100000.00,
-                10,
-                "Java, Spring Boot, React, PostgreSQL",
-                "Agile",
-                10
-        );
-        swProject1.setCompletedFeatures(6);
-        projectService.addProject(swProject1);
+            projectService = new ProjectServices(Seed.seedProjects());
+            Task task1 = new Task("TASK001", "PROJ001", "Implement User Authentication",
+                    "Create secure login and registration system", "USR001", "High");
+            task1.setStatus("Completed");
+            taskService.addTask(task1);
 
-        SoftwareProject swProject2 = new SoftwareProject(
-                "PROJ002",
-                "Mobile Banking App",
-                "Secure mobile banking application",
-                "2025-02-01",
-                "2025-08-31",
-                150000.00,
-                12,
-                "Flutter, Firebase, Node.js",
-                "Scrum",
-                15
-        );
-        swProject2.setCompletedFeatures(3);
-        projectService.addProject(swProject2);
+            Task task2 = new Task("TASK002", "PROJ001", "Design Product Catalog",
+                    "Create responsive product listing interface", "USR002", "High");
+            task2.setStatus("In Progress");
+            taskService.addTask(task2);
 
-        HardwareProject hwProject1 = new HardwareProject(
-                "PROJ003",
-                "IoT Smart Home Hub",
-                "Central hub for smart home devices",
-                "2025-03-01",
-                "2025-12-31",
-                200000.00,
-                8,
-                "Embedded Systems",
-                20
-        );
-        hwProject1.setAssembledComponents(15);
-        hwProject1.setPrototypeCompleted(true);
-        projectService.addProject(hwProject1);
+            Task task3 = new Task("TASK003", "PROJ001", "Integrate Payment Gateway",
+                    "Add Stripe payment processing", "USR001", "High");
+            taskService.addTask(task3);
 
-        Task task1 = new Task("TASK001", "PROJ001", "Implement User Authentication",
-                "Create secure login and registration system", "USR001", "High", "2025-02-15");
-        task1.setStatus("Completed");
-        taskService.addTask(task1);
+            Task task4 = new Task("TASK004", "PROJ002", "Setup Firebase Backend",
+                    "Configure Firebase authentication and database", "USR003", "Medium");
+            task4.setStatus("Completed");
+            taskService.addTask(task4);
 
-        Task task2 = new Task("TASK002", "PROJ001", "Design Product Catalog",
-                "Create responsive product listing interface", "USR002", "High", "2025-03-01");
-        task2.setStatus("In Progress");
-        taskService.addTask(task2);
+            Task task5 = new Task("TASK005", "PROJ003", "PCB Design Review",
+                    "Review and finalize circuit board design", "USR002", "High");
+            taskService.addTask(task5);
 
-        Task task3 = new Task("TASK003", "PROJ001", "Integrate Payment Gateway",
-                "Add Stripe payment processing", "USR001", "High", "2025-03-15");
-        taskService.addTask(task3);
-
-        Task task4 = new Task("TASK004", "PROJ002", "Setup Firebase Backend",
-                "Configure Firebase authentication and database", "USR003", "Medium", "2025-03-10");
-        task4.setStatus("Completed");
-        taskService.addTask(task4);
-
-        Task task5 = new Task("TASK005", "PROJ003", "PCB Design Review",
-                "Review and finalize circuit board design", "USR002", "High", "2025-04-01");
-        taskService.addTask(task5);
-
-        System.out.println("Sample data loaded: 3 projects, 5 tasks.");
+            System.out.println("Sample data loaded: 3 projects, 5 tasks.");
+        } catch (Exception e) {
+            System.out.println("Error loading sample data: " + e.getMessage());
+        }
     }
 
     private static void simulateLogin() {
@@ -130,16 +85,52 @@ public class Main {
 
         int choice = ValidationUtils.getValidatedChoice(scanner, "Select user type (1-2): ", 1, 2);
 
+        User user = null;
         if (choice == 1) {
-            currentUser = new AdminUser("ADM001", "Admin User", "admin@projectmgmt.com", "admin123");
+             user = new AdminUser("ADM001", "Admin User", "admin@projectmgmt.com", "admin123");
             System.out.println("Logged in as Administrator");
         } else {
-            currentUser = new RegularUser("USR001", "John Developer", "john@projectmgmt.com", "user123");
+            user = new RegularUser("USR001", "John Developer", "john@projectmgmt.com", "user123");
             System.out.println("Logged in as Regular User");
         }
 
-        menu.setCurrentUser(currentUser);
-        currentUser.displayUserInfo();
+        ConsoleMenu.setCurrentUser(user);
+        ConsoleMenu.getCurrentUser().displayUserInfo();
+        menu.pause();
+    }
+
+    private static void switchUser() {
+        System.out.println("\nSWITCH USER");
+        User current = ConsoleMenu.getCurrentUser();
+
+        System.out.println("Currently logged in as:" + current.getRole());
+        System.out.println("1. Switch to Administrator");
+        System.out.println("2. Switch to Regular User");
+        System.out.println("0. Cancel");
+
+        int choice = ValidationUtils.getValidatedChoice(scanner, "Select user type (0-2): ", 0, 2);
+
+        if (choice == 0) {
+            System.out.println( "User switch cancelled." );
+            menu.pause();
+            return;
+        }
+        User newUser;
+
+
+        if (choice == 1) {
+            newUser = new AdminUser("ADM001", "Admin User", "admin@system.com", "adminpass");
+            System.out.println("You are now logged in as ADMIN.");
+        } else {
+            newUser = new RegularUser("USR001", "Regular User", "user@system.com", "userpass");
+            System.out.println("You are now logged in as REGULAR USER.");
+        }
+
+        // Update your session user
+        ConsoleMenu.setCurrentUser(newUser);
+
+        // Display the new user information
+        newUser.displayUserInfo();
         menu.pause();
     }
 
@@ -147,13 +138,14 @@ public class Main {
         boolean running = true;
         while (running) {
             menu.displayMainMenu();
-            int choice = ValidationUtils.getValidatedChoice(scanner, "Enter your choice: ", 0, 5);
+            int choice = ValidationUtils.getValidatedChoice(scanner, "Enter your choice: ", 0, 6);
             switch (choice) {
                 case 1 -> handleProjectManagement();
                 case 2 -> handleTaskManagement();
                 case 3 -> handleUserManagement();
                 case 4 -> handleReports();
                 case 5 -> { menu.displaySystemStats(); menu.pause(); }
+                case 6 -> switchUser();
                 case 0 -> running = false;
             }
         }
@@ -178,12 +170,11 @@ public class Main {
     }
 
     private static void createNewProject() {
+        try {
+        ConsoleMenu.requirePermission("CREATE_PROJECTS");
         System.out.println("\nCREATE NEW PROJECT");
         System.out.println("Select Project Type: 1) Software  2) Hardware");
-
         int type = ValidationUtils.getValidatedChoice(scanner, "Enter choice (1-2): ", 1, 2);
-
-        String projectId = ValidationUtils.getValidatedString(scanner, "Enter Project ID: ");
         String name = ValidationUtils.getValidatedString(scanner, "Enter Project Name: ");
         String description = ValidationUtils.getValidatedString(scanner, "Enter Description: ");
         String startDate = ValidationUtils.getValidatedDate(scanner, "Enter Start Date (YYYY-MM-DD): ");
@@ -196,7 +187,7 @@ public class Main {
             int teamSize = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter Team Size: ");
             int budgetInt = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter Budget (whole number): ");
 
-            SoftwareProject project = new SoftwareProject(projectId, name, description, startDate, endDate,
+            SoftwareProject project = new SoftwareProject( name, description, startDate, endDate,
                     (double) budgetInt, teamSize, techStack, methodology, totalFeatures);
             projectService.addProject(project);
         } else {
@@ -205,9 +196,12 @@ public class Main {
             int teamSize = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter Team Size: ");
             int budgetInt = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter Budget (whole number): ");
 
-            HardwareProject project = new HardwareProject(projectId, name, description, startDate, endDate,
+            HardwareProject project = new HardwareProject( name, description, startDate, endDate,
                     (double) budgetInt, teamSize, hardwareType, totalComponents);
             projectService.addProject(project);
+        }
+        } catch (SecurityException se) {
+            System.out.println("Permission Denied: " + se.getMessage());
         }
 
         menu.pause();
@@ -226,6 +220,8 @@ public class Main {
     }
 
     private static void updateProject() {
+        try {
+        ConsoleMenu.requirePermission("UPDATE_PROJECTS");
         String projectId = ValidationUtils.getValidatedString(scanner, "\nEnter Project ID to update: ");
         Project project = projectService.findProjectById(projectId);
         if (project == null) {
@@ -250,8 +246,14 @@ public class Main {
         projectService.updateProject(projectId, project);
         menu.pause();
     }
+    catch (SecurityException se) {
+        System.out.println("Permission Denied: " + se.getMessage());
+    }
+    }
 
     private static void deleteProject() {
+        try {
+        ConsoleMenu.requirePermission("DELETE_PROJECTS");
         String projectId = ValidationUtils.getValidatedString(scanner, "\nEnter Project ID to delete: ");
         Project project = projectService.findProjectById(projectId);
         if (project != null) {
@@ -265,6 +267,10 @@ public class Main {
             }
         }
         menu.pause();
+    }
+    catch (SecurityException se) {
+        System.out.println("Permission Denied: " + se.getMessage());
+    }
     }
 
     private static void filterProjectsByStatus() {
@@ -329,9 +335,13 @@ public class Main {
     }
 
     private static void createNewTask() {
+       try {
+
+
+        ConsoleMenu.requirePermission("CREATE_TASKS");
+
         System.out.println("\nCREATE NEW TASK");
 
-        String taskId = ValidationUtils.getValidatedString(scanner, "Enter Task ID: ");
         String projectId = ValidationUtils.getValidatedString(scanner, "Enter Project ID: ");
 
         if (projectService.findProjectById(projectId) == null) {
@@ -347,9 +357,12 @@ public class Main {
         String priority = ValidationUtils.getValidatedString(scanner, "Enter Priority: ");
         String dueDate = ValidationUtils.getValidatedDate(scanner, "Enter Due Date (YYYY-MM-DD): ");
 
-        Task task = new Task(taskId, projectId, taskName, description, assignedTo, priority, dueDate);
+        Task task = new Task(projectId, taskName, description, assignedTo, priority, dueDate);
         taskService.addTask(task);
         menu.pause();
+    }catch (SecurityException se) {
+        System.out.println("Permission Denied: " + se.getMessage());
+    }
     }
 
     private static void searchTask() {
@@ -365,6 +378,7 @@ public class Main {
     }
 
     private static void updateTaskStatus() {
+
         String taskId = ValidationUtils.getValidatedString(scanner, "\nEnter Task ID to update: ");
         Task task = taskService.findTaskById(taskId);
         if (task == null) {
@@ -388,7 +402,13 @@ public class Main {
         menu.pause();
     }
 
+
+
     private static void deleteTask() {
+        try {
+
+
+        ConsoleMenu.requirePermission("DELETE_TASKS");
         String taskId = ValidationUtils.getValidatedString(scanner, "\nEnter Task ID to delete: ");
         Task task = taskService.findTaskById(taskId);
         if (task != null) {
@@ -402,6 +422,10 @@ public class Main {
             }
         }
         menu.pause();
+    }
+    catch (SecurityException se) {
+        System.out.println("Permission Denied: " + se.getMessage());
+    }
     }
 
     private static void viewTasksByProject() {
@@ -459,9 +483,9 @@ public class Main {
     private static void handleUserManagement() {
         System.out.println("USER MANAGEMENT");
         System.out.println("Current User Information:");
-        currentUser.displayUserInfo();
+        ConsoleMenu.getCurrentUser().displayUserInfo();
         System.out.println("User Permissions:");
-        for (String permission : currentUser.getPermissions()) {
+        for (String permission : ConsoleMenu.getCurrentUser().getPermissions()) {
             System.out.println(" - " + permission);
         }
         menu.pause();
@@ -503,4 +527,5 @@ public class Main {
 
         System.out.printf("Average Completion: %.2f%%%n", projectService.getAverageCompletion());
     }
+
 }

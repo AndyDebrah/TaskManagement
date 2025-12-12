@@ -4,7 +4,7 @@ import interfaces.Completable;
 
 /** Task model representing individual tasks within projects. */
 public class Task implements Completable {
-    private String taskId;
+    private static int taskCounter = 1;
     private String projectId;
     private String taskName;
     private String description;
@@ -12,10 +12,15 @@ public class Task implements Completable {
     private String priority;
     private String status;
     private String dueDate;
+    private String taskId;
+    private String generateTaskId() {
+        return String.format("TSK%04d", taskCounter++);
+    }
 
-    public Task(String taskId, String projectId, String taskName, String description,
+
+    public Task(String projectId, String taskName, String description,
                 String assignedTo, String priority, String dueDate) {
-        this.taskId = taskId;
+        this.taskId = generateTaskId();
         this.projectId = projectId;
         this.taskName = taskName;
         this.description = description;
@@ -41,7 +46,6 @@ public class Task implements Completable {
     public void setStatus(String status) { this.status = status; }
     public String getDueDate() { return dueDate; }
     public void setDueDate(String dueDate) { this.dueDate = dueDate; }
-
     public boolean isCompleted() { return "Completed".equalsIgnoreCase(status); }
     public void startTask() { if ("Pending".equalsIgnoreCase(status)) this.status = "In Progress"; }
     public void completeTask() { this.status = "Completed"; }

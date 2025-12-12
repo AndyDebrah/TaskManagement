@@ -2,6 +2,7 @@ package models;
 
 /** Common abstract project class. */
 public abstract class Project {
+    private static int projectCounter = 1;
     private String projectId;
     private String projectName;
     private String description;
@@ -10,14 +11,15 @@ public abstract class Project {
     private String status;
     private double budget;
     private int teamSize;
-
     private Task[] tasks;
     private int taskCount;
     private static final int MAX_TASKS_PER_PROJECT = 200;
-
-    public Project(String projectId, String projectName, String description,
+    private String generateProjectId() {
+        return String.format("PRJ%04d", projectCounter++);
+    }
+    public Project(String projectName, String description,
                    String startDate, String endDate, double budget, int teamSize) {
-        this.projectId = projectId;
+        this.projectId = generateProjectId();
         this.projectName = projectName;
         this.description = description;
         this.startDate = startDate;
