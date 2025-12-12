@@ -128,6 +128,70 @@ classDiagram
 - Polymorphism: Services operate on `Project` references and call overridden methods such as `calculateCompletionPercentage()`.
 - Encapsulation: Fields are private/protected with getters/setters and controlled mutations.
 
+🔧 Functionality
+The TaskManagement console system provides a complete set of project, task, and user-management features powered by Object-Oriented Programming principles. All data is stored in memory and manipulated through a menu-driven console interface.
+1. Project Management
+•	Create new projects (Software or Hardware)
+•	Auto-generated project IDs (format: PJ###)
+•	Update existing project details
+•	View all projects or filter by type
+•	Track project status and completion percentage
+•	Display full project summaries
+
+2. Task Management
+•	Create tasks linked to a project
+•	Auto-generated task IDs (format: TK###)
+•	Assign tasks to users
+•	Update priority, status, due dates
+•	Mark tasks as completed
+•	View tasks by project, by user, or all tasks
+
+3. User Management
+•	Built-in support for AdminUser and RegularUser
+•	Login system using seeded default accounts
+•	Controlled permissions:
+o	Admins can manage users, projects, tasks, and reports
+o	Regular users can view and update only their assigned tasks
+•	Switch active user session (Admin ↔ Regular) without restarting the program
+
+4. Reports & Analytics
+Includes automated report generation:
+•	Project Status Report
+•	Task Summary Report
+•	Productivity Report (for Regular Users)
+•	System-level performance indicators
+•	Displays completion percentages using polymorphic logic from Completable interface
+
+5. System Statistics
+•	Total projects
+•	Total tasks
+•	Completed vs Pending tasks
+•	User activity summary
+•	Auto-refresh of statistics after updates
+
+6. Input Validation & Error Handling
+•	Full validation using ValidationUtils:
+o	Valid integer inputs
+o	Valid dates (YYYY-MM-DD)
+o	Valid email formats
+o	Enforced menu input range
+o	Status & priority validation
+•	Prevents invalid data from entering the system
+
+7. Auto-ID Generation
+Uses Seed.java to generate:
+•	Project IDs → PJ001, PJ002, ...
+•	Task IDs → TK001, TK002, ...
+•	Ensures uniqueness and prevents manual errors
+
+8. Console User Interface
+•	Clean, structured main menu
+•	Sub-menus for each management module
+•	Fail-safe input handling
+•	Reusable UI components via ConsoleMenu
+
+
+
 ## Final testing & cleanup notes
 
 What I ran during finalization:
