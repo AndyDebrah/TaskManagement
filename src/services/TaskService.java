@@ -1,14 +1,18 @@
 package services;
 
 import models.Task;
+import exceptions.TaskNotFoundException;
+import exceptions.ProjectNotFoundException;
+import exceptions.InvalidInputException;
+import utils.ValidationUtils;
 
 /** Service class for managing task operations. */
 public class TaskService {
-    private Task[] tasks;
+    private final Task[] tasks;
     private int taskCount;
     private static final int MAX_TASKS = 500;
 
-    private ProjectServices projectService;
+    private ProjectService projectService;
 
     public TaskService() {
         this.tasks = new Task[MAX_TASKS];
@@ -16,27 +20,43 @@ public class TaskService {
         this.projectService = null;
     }
 
-    public TaskService(ProjectServices projectService) {
+    public TaskService(Task[] tasks) {
         this();
+        for (Task task : tasks) {
+            if (task != null) {
+                this.tasks[taskCount++] = task;
+            }
+        }
+    }
+
+    public TaskService(Task[] tasks, ProjectService projectService) {
+        this(tasks);
         this.projectService = projectService;
     }
 
+
     public boolean addTask(Task task) {
         if (taskCount >= MAX_TASKS) {
-            System.out.println("Error: Maximum task limit reached!");
-            return false;
+            throw new InvalidInputException("Error: Maximum task limit reached!");
         }
         if (findTaskById(task.getTaskId()) != null) {
-            System.out.println("Error: Task ID already exists!");
-            return false;
+           throw new InvalidInputException("Error: Task ID already exists!");
         }
+        validateTaskData(task);
         tasks[taskCount++] = task;
         if (projectService != null) {
             models.Project project = projectService.findProjectById(task.getProjectId());
             if (project != null) project.addTask(task);
+
+        }
+        else {
+            throw new ProjectNotFoundException(task.getProjectId());
         }
         System.out.println("Task added successfully.");
         return true;
+
+
+
     }
 
     public Task findTaskById(String taskId) {
@@ -47,13 +67,13 @@ public class TaskService {
     public boolean updateTask(String taskId, Task updatedTask) {
         for (int i = 0; i < taskCount; i++) {
             if (tasks[i].getTaskId().equals(taskId)) {
+                validateTaskData(updatedTask);
                 tasks[i] = updatedTask;
                 System.out.println("Task updated successfully.");
                 return true;
             }
         }
-        System.out.println("Error: Task not found!");
-        return false;
+        throw new TaskNotFoundException(taskId);
     }
 
     public boolean deleteTask(String taskId) {
@@ -67,17 +87,19 @@ public class TaskService {
                     models.Project project = projectService.findProjectById(projectId);
                     if (project != null) project.removeTask(taskId);
                 }
+                else{
+                    throw new ProjectNotFoundException(projectId);
+                }
                 System.out.println("Task deleted successfully.");
                 return true;
             }
         }
-        System.out.println("Error: Task not found!");
-        return false;
+       throw new TaskNotFoundException("taskId");
     }
 
     public Task[] getAllTasks() {
         Task[] result = new Task[taskCount];
-        for (int i = 0; i < taskCount; i++) result[i] = tasks[i];
+        System.arraycopy(tasks, 0, result, 0, taskCount);
         return result;
     }
 
@@ -119,8 +141,8 @@ public class TaskService {
 
     public void displayAllTasks() {
         if (taskCount == 0) {
-            System.out.println("No tasks available.");
-            return;
+            throw new TaskNotFoundException("No tasks available to display.");
+
         }
         System.out.println("TASK LIST");
         for (int i = 0; i < taskCount; i++) {
@@ -138,5 +160,18 @@ public class TaskService {
         int completedCount = 0;
         for (Task task : projectTasks) if (task.isCompleted()) completedCount++;
         return (completedCount * 100.0) / projectTasks.length;
+    }
+    private void validateTaskData(Task task) {
+        if (task == null) {
+            throw new InvalidInputException("Task must not be null.");
+        }
+        ValidationUtils.requireNonEmpty(task.getTaskId(), "Task ID");
+        ValidationUtils.requireNonEmpty(task.getProjectId(), "Project ID");
+        ValidationUtils.requireNonEmpty(task.getTaskName(), "Task Name");
+        ValidationUtils.requireNonEmpty(task.getDescription(), "Description");
+        ValidationUtils.requireNonEmpty(task.getAssignedTo(), "Assigned User");
+        ValidationUtils.requireValidPriority(task.getPriority());
+        ValidationUtils.requireNonEmpty(task.getDueDate(), "Due Date");
+        ValidationUtils.requireValidStatus(task.getStatus());
     }
 }

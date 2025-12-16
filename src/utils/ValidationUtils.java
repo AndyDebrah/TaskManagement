@@ -121,7 +121,32 @@ public class ValidationUtils {
         }
         return false;
     }
+    public static boolean isValidTextField(String input) {
 
+        if(!isValidString(input)) {
+            return false;
+        }
+        String trimmed = input.trim();
+        if (trimmed.length()<3 || trimmed.length()>50){
+            return false;
+        }
+
+
+        return input.matches(".*[A-Za-z].*");
+    }
+
+    public static String getValidatedTextField(Scanner scanner, String prompt, String fieldName) {
+        String input;
+        do {
+            System.out.print(prompt);
+            input = scanner.nextLine().trim();
+            if (!isValidTextField(input)) {
+                System.out.println("❌ " + fieldName + " must be at least 3 characters and contain letters (not only numbers).");
+
+            }
+        } while (!isValidTextField(input));
+        return input;
+    }
     /**
      * Get validated string input from user
      */
@@ -223,5 +248,28 @@ public class ValidationUtils {
             }
         }
         return choice;
+    }
+    public static void requireNonEmpty(String input, String fieldName) {
+        if (!isValidString(input)) {
+            throw new IllegalArgumentException(fieldName + " cannot be null or empty.");
+        }
+    }
+
+    public static void requirePositive(int number, String fieldName) {
+        if (number <= 0) {
+            throw new IllegalArgumentException(fieldName + " must be a positive integer.");
+        }
+    }
+
+    public static void requireValidPriority(String priority) {
+        if (!isValidPriority(priority)) {
+            throw new IllegalArgumentException("Invalid priority value: " + priority);
+        }
+    }
+
+    public static void requireValidStatus(String status) {
+        if (!isValidStatus(status)) {
+            throw new IllegalArgumentException("Invalid status value: " + status);
+        }
     }
 }

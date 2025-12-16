@@ -9,11 +9,11 @@ import services.*;
 public class StatusReport {
     private String reportId;
     private String reportDate;
-    private ProjectServices projectService;
+    private ProjectService projectService;
     private TaskService taskService;
 
     public StatusReport(String reportId, String reportDate,
-                        ProjectServices projectService, TaskService taskService) {
+                        ProjectService projectService, TaskService taskService) {
         this.reportId = reportId;
         this.reportDate = reportDate;
         this.projectService = projectService;

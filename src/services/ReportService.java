@@ -5,10 +5,10 @@ import models.Task;
 
 /** Service class for generating reports. */
 public class ReportService {
-    private ProjectServices projectService;
-    private TaskService taskService;
+    private final ProjectService projectService;
+    private final TaskService taskService;
 
-    public ReportService(ProjectServices projectService, TaskService taskService) {
+    public ReportService(ProjectService projectService, TaskService taskService) {
         this.projectService = projectService;
         this.taskService = taskService;
     }

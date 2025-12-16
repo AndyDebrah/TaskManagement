@@ -1,20 +1,28 @@
 package services;
 
+
 import models.Project;
+import exceptions.InvalidProjectDataException;
+import exceptions.ProjectNotFoundException;
+import utils.ValidationUtils;
+
+
+
+
 
 
 /** Service class for managing project operations (in-memory). */
-public class ProjectServices {
+public class ProjectService {
     private Project[] projects;
     private int projectCount;
     private static final int MAX_PROJECTS = 100;
 
-    public ProjectServices() {
+    public ProjectService() {
         this.projects = new Project[MAX_PROJECTS];
         this.projectCount = 0;
     }
 
-    public  ProjectServices(Project[] seededProjects) {
+    public ProjectService(Project[] seededProjects) {
         this.projects = new Project[MAX_PROJECTS];
         this.projectCount = 0;
         for (Project project : seededProjects) {
@@ -26,13 +34,13 @@ public class ProjectServices {
 
     public boolean addProject(Project project) {
         if (projectCount >= MAX_PROJECTS) {
-            System.out.println("Error: Maximum project limit reached!");
-            return false;
+            throw new InvalidProjectDataException("Error: Maximum project limit reached!");
         }
         if (findProjectById(project.getProjectId()) != null) {
-            System.out.println("Error: Project ID already exists!");
-            return false;
+            throw new InvalidProjectDataException("Error: Project ID already exists!");
+
         }
+        validateProjectData(project);
         projects[projectCount++] = project;
         System.out.println("Project added successfully.");
         return true;
@@ -45,16 +53,17 @@ public class ProjectServices {
         return null;
     }
 
+
     public boolean updateProject(String projectId, Project updatedProject) {
         for (int i = 0; i < projectCount; i++) {
             if (projects[i].getProjectId().equals(projectId)) {
+                validateProjectData(updatedProject);
                 projects[i] = updatedProject;
                 System.out.println("Project updated successfully.");
                 return true;
             }
         }
-        System.out.println("Error: Project not found!");
-        return false;
+       throw new ProjectNotFoundException(projectId);
     }
 
     public boolean deleteProject(String projectId) {
@@ -67,8 +76,27 @@ public class ProjectServices {
                 return true;
             }
         }
-        System.out.println("Error: Project not found!");
-        return false;
+       throw new ProjectNotFoundException(projectId);
+    }
+
+    private void validateProjectData(Project project){
+        if (project == null){
+            throw new InvalidProjectDataException("Error: Project data cannot be null!");
+        }
+        ValidationUtils.requireNonEmpty(project.getProjectId(), "Project ID");
+        ValidationUtils.requireNonEmpty(project.getProjectName(), "Project Name");
+        ValidationUtils.requireNonEmpty(project.getStatus(), "Project Status");
+        ValidationUtils.requireNonEmpty(project.getProjectId(), "Description");
+        if(project.getTeamSize() <=1){
+            throw new InvalidProjectDataException("Error: Team size must be positive!");
+
+        }
+        if (project.getBudget() <1){
+            throw new InvalidProjectDataException("Error: Budget cannot be negative!");
+        }
+
+
+
     }
 
     public Project[] getAllProjects() {
