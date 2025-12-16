@@ -51,6 +51,31 @@ public class Seed {
         return projects;
     }
 
+    public static  Task[] seedTasks(){
+        Task[] tasks = new Task[100];
+
+        Task task = new Task("TASK001", "PROJ001", "Implement User Authentication",
+                "Create secure login and registration system", "USR001", "High");
+        task.setStatus("Completed");
+        tasks[0] = task;
+        Task task2 = new Task("TASK002", "PROJ001", "Design Product Catalog",
+                "Create responsive product listing interface", "USR002", "High");
+        task2.setStatus("In Progress");
+        tasks[1] = task2;
+        Task task3 = new Task("TASK003", "PROJ001", "Integrate Payment Gateway",
+                "Add Stripe payment processing", "USR001", "High");
+        tasks[2] = task3;
+        Task task4 = new Task("TASK004", "PROJ002", "Setup Firebase Backend",
+                "Configure Firebase authentication and database", "USR003", "Medium");
+        task4.setStatus("Completed");
+        tasks[3] = task4;
+        Task task5 = new Task("TASK005", "PROJ003", "PCB Design Review",
+                "Review and finalize circuit board design", "USR002", "High");
+      tasks[4] = task5;
+
+        return tasks;
+    }
+
     private static AdminUser defaultAdmin =
             new AdminUser("ADMIN-001", "System Admin", "admin@app.com", "admin123");
 

@@ -1,9 +1,9 @@
 package utils;
 
 import java.util.Scanner;
-import models.Project;
+
 import models.User;
-import services.ProjectServices;
+import services.ProjectService;
 import services.ReportService;
 import services.TaskService;
 
@@ -12,13 +12,13 @@ import services.TaskService;
  * Presents text-based menus and simple helper utilities.
  */
 public class ConsoleMenu {
-    private Scanner scanner;
-    private ProjectServices projectService;
-    private TaskService taskService;
-    private ReportService reportService;
+    private final Scanner scanner;
+    private final ProjectService projectService;
+    private final TaskService taskService;
+    private final ReportService reportService;
     private static User currentUser;
 
-    public ConsoleMenu(ProjectServices projectService, TaskService taskService,
+    public ConsoleMenu(ProjectService projectService, TaskService taskService,
                        ReportService reportService, Scanner scanner) {
         this.scanner = scanner;
         this.projectService = projectService;
