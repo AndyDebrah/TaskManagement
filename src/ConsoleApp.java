@@ -67,7 +67,7 @@ public class ConsoleApp {
 
 
         if (choice == 1) {
-            newUser = new AdminUser("ADM001", "Admin User", "admin@system.com", "adminpass");
+            newUser = new AdminUser("ADM001", "Admin User", "admin@system.com", "admin-pass");
             System.out.println("You are now logged in as ADMIN.");
         } else {
             newUser = new RegularUser("USR001", "Regular User", "user@system.com", "userpass");
@@ -136,53 +136,68 @@ public class ConsoleApp {
             System.out.println("\nCREATE NEW PROJECT");
             System.out.println("Select Project Type: 1) Software  2) Hardware");
             int type = ValidationUtils.getValidatedChoice(scanner, "Enter choice (1-2): ", 1, 2);
-            String name = ValidationUtils.getValidatedTextField(scanner,
-                    "Enter Project Name: ", "Project Name");
-            String description = ValidationUtils.getValidatedTextField(scanner,
-                    "Enter Description: ", "Description");
-            String startDate = ValidationUtils.getValidatedDate(scanner, "Enter Start Date (YYYY-MM-DD): ");
-            String endDate = ValidationUtils.getValidatedDate(scanner, "Enter End Date (YYYY-MM-DD): ");
-
             if (type == 1) {
-                String techStack = ValidationUtils.getValidatedString(scanner, "Enter Technology Stack: ");
-                String methodology = ValidationUtils.getValidatedString(scanner, "Enter Methodology (Agile/Waterfall): ");
-                int totalFeatures = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter Total Features: ");
-                int teamSize = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter Team Size: ");
-                int budgetInt = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter Budget (whole number): ");
-
-                SoftwareProject project = new SoftwareProject( name, description, startDate, endDate,
-                        budgetInt, teamSize, techStack, methodology, totalFeatures);
+                SoftwareProject project = readSoftwareProjectFromInput();
                 projectService.addProject(project);
+                System.out.println("Project added successfully.");
             } else {
-                String hardwareType = ValidationUtils.getValidatedString(scanner, "Enter Hardware Type: ");
-                int totalComponents = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter Total Components: ");
-                int teamSize = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter Team Size: ");
-                int budgetInt = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter Budget (whole number): ");
-
-                HardwareProject project = new HardwareProject( name, description, startDate, endDate,
-                        budgetInt, teamSize, hardwareType, totalComponents);
+                HardwareProject project = readHardwareProjectFromInput();
                 projectService.addProject(project);
+                System.out.println("Project added successfully.");
             }
         } catch (SecurityException se) {
             System.out.println("Permission Denied: " + se.getMessage());
         }
-
         menu.pause();
     }
+    private SoftwareProject readSoftwareProjectFromInput() {
+        String name = ValidationUtils.getValidatedTextField(scanner,
+                "Enter Project Name: ", "Project Name");
+        String description = ValidationUtils.getValidatedTextField(scanner,
+                "Enter Description: ", "Description");
+        String startDate = ValidationUtils.getValidatedDate(scanner, "Enter Start Date (YYYY-MM-DD): ");
+        String endDate = ValidationUtils.getValidatedDate(scanner, "Enter End Date (YYYY-MM-DD): ");
+        String techStack = ValidationUtils.getValidatedString(scanner, "Enter Technology Stack: ");
+        String methodology = ValidationUtils.getValidatedString(scanner, "Enter Methodology (Agile/Waterfall): ");
+        int totalFeatures = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter Total Features: ");
+        int teamSize = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter Team Size: ");
+        int budgetInt = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter Budget (whole number): ");
 
-    private  void searchProject() {
-        String projectId = ValidationUtils.getValidatedString(scanner, "\nEnter Project ID to search: ");
-        Project project = projectService.findProjectById(projectId);
+
+        return new SoftwareProject(name, description, startDate, endDate,
+                budgetInt, teamSize, techStack, methodology, totalFeatures);
+    }
+
+    private HardwareProject readHardwareProjectFromInput() {
+        String name = ValidationUtils.getValidatedTextField(scanner,
+                "Enter Project Name: ", "Project Name");
+        String description = ValidationUtils.getValidatedTextField(scanner,
+                "Enter Description: ", "Description");
+        String startDate = ValidationUtils.getValidatedDate(scanner, "Enter Start Date (YYYY-MM-DD): ");
+        String endDate = ValidationUtils.getValidatedDate(scanner, "Enter End Date (YYYY-MM-DD): ");
+        String hardwareType = ValidationUtils.getValidatedString(scanner, "Enter Hardware Type: ");
+        int totalComponents = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter Total Components: ");
+        int teamSize = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter Team Size: ");
+        int budgetInt = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter Budget (whole number): ");
+
+
+        return new HardwareProject(name, description, startDate, endDate,
+                budgetInt, teamSize, hardwareType, totalComponents);
+    }
+
+
+
+private void searchProject() {
+    Project project = findProjectOrNotify();
         if (project != null) {
             System.out.println("Project Found:");
             project.displayProjectInfo();
-        } else {
-            System.out.println("Project not found.");
+
         }
-        menu.pause();
+
     }
 
-    private  void updateProject() {
+private void updateProject() {
         try {
            SessionManager.requirePermission("UPDATE_PROJECTS");
             String projectId = ValidationUtils.getValidatedString(scanner, "\nEnter Project ID to update: ");
@@ -207,6 +222,7 @@ public class ConsoleApp {
             }
             try {
                 projectService.updateProject(projectId, project);
+                System.out.println("Project updated successfully.");
                 menu.pause();
             } catch (RuntimeException e){
                 showError(e);
@@ -217,7 +233,7 @@ public class ConsoleApp {
         }
     }
 
-    private  void deleteProject() {
+private void deleteProject() {
         try {
             SessionManager.requirePermission("DELETE_PROJECTS");
             String projectId = ValidationUtils.getValidatedString(scanner, "\nEnter Project ID to delete: ");
@@ -228,6 +244,7 @@ public class ConsoleApp {
                 String confirm = scanner.nextLine();
                 if (confirm.equalsIgnoreCase("yes")) {
                     projectService.deleteProject(projectId);
+                    System.out.println("Project deleted successfully.");
                 } else {
                     System.out.println("Deletion cancelled.");
                 }
@@ -309,56 +326,56 @@ public class ConsoleApp {
         }
     }
 
-    private  void createNewTask() {
+private void createNewTask()  {
         try {
-
-
             SessionManager.requirePermission("CREATE_TASKS");
-
             System.out.println("\nCREATE NEW TASK");
-
-            String projectId = ValidationUtils.getValidatedString(scanner, "Enter Project ID: ");
-
-            if (projectService.findProjectById(projectId) == null) {
-                System.out.println("Project not found. Task creation cancelled.");
-                menu.pause();
+            Task task = readTaskFromInput();
+            if (task == null) {
+                // already notified user
                 return;
             }
-
-            String taskName = ValidationUtils.getValidatedString(scanner, "Enter Task Name: ");
-            String description = ValidationUtils.getValidatedString(scanner, "Enter Description: ");
-            String assignedTo = ValidationUtils.getValidatedString(scanner, "Assign to User ID: ");
-            System.out.println("Priority: High, Medium, Low");
-            String priority = ValidationUtils.getValidatedString(scanner, "Enter Priority: ");
-            String dueDate = ValidationUtils.getValidatedDate(scanner, "Enter Due Date (YYYY-MM-DD): ");
-
-            Task task = new Task(projectId, taskName, description, assignedTo, priority, dueDate);
             taskService.addTask(task);
+            System.out.println("Task added successfully.");
             menu.pause();
         }catch (SecurityException se) {
             System.out.println("Permission Denied: " + se.getMessage());
         }
+}
+    private  Task readTaskFromInput() {
+    String projectId = ValidationUtils.getValidatedString(scanner, "Enter Project ID for the Task: ");
+
+        if (projectService.findProjectById(projectId) == null) {
+            System.out.println("Project not found. Task creation cancelled.");
+            menu.pause();
+            return null;
+        }
+        String taskName = ValidationUtils.getValidatedString(scanner, "Enter Task Name: ");
+        String description = ValidationUtils.getValidatedString(scanner, "Enter Description: ");
+        String assignedTo = ValidationUtils.getValidatedString(scanner, "Assign to User ID: ");
+        System.out.println("Priority: High, Medium, Low");
+        String priority = ValidationUtils.getValidatedString(scanner, "Enter Priority: ");
+        String dueDate = ValidationUtils.getValidatedDate(scanner, "Enter Due Date (YYYY-MM-DD): ");
+
+        return new Task(projectId, taskName, description, assignedTo, priority, dueDate);
     }
 
-    private  void searchTask() {
-        String taskId = ValidationUtils.getValidatedString(scanner, "\nEnter Task ID to search: ");
-        Task task = taskService.findTaskById(taskId);
+  private void searchTask() {
+    Task task = findTaskOrNotify("\nEnter Task ID to search: ");
         if (task != null) {
             System.out.println("Task Found:");
             task.displayTaskInfo();
-        } else {
-            System.out.println("Task not found.");
+
         }
         menu.pause();
     }
 
-    private  void updateTaskStatus() {
+private void updateTaskStatus() {
 
-        String taskId = ValidationUtils.getValidatedString(scanner, "\nEnter Task ID to update: ");
-        Task task = taskService.findTaskById(taskId);
-        if (task == null) {
-            System.out.println("Task not found.");
-            menu.pause();
+    Task task = findTaskOrNotify("\nEnter Task ID to update: ");
+
+    if (task == null) {
+
             return;
         }
 
@@ -376,7 +393,8 @@ public class ConsoleApp {
 
 
         try {
-            taskService.updateTask(taskId, task);
+            taskService.updateTask(task.getTaskId(), task);
+            System.out.println("Task updated successfully.");
             menu.pause();
         } catch (RuntimeException e) {
             showError(e);
@@ -384,7 +402,7 @@ public class ConsoleApp {
     }
 
 
-    private  void deleteTask() {
+private void deleteTask(){
         try {
 
 
@@ -398,10 +416,13 @@ public class ConsoleApp {
                 if (confirm.equalsIgnoreCase("yes")) {
                     try {
                         taskService.deleteTask(taskId);
+                        System.out.println("Task deleted successfully.");
+
                     }catch (RuntimeException e){
                         showError(e);
                     }
-                } else {
+
+                    } else {
                     System.out.println("Deletion cancelled.");
                 }
             }
@@ -516,6 +537,25 @@ public class ConsoleApp {
 
         System.out.printf("Average Completion: %.2f%%%n", projectService.getAverageCompletion());
     }
+
+private Project findProjectOrNotify() {
+    String projectId = ValidationUtils.getValidatedString(scanner, "\nEnter Project ID to search: ");
+    Project project = projectService.findProjectById(projectId);
+    if (project == null) {
+        System.out.println("Project not found.");
+    }
+    return project;
+}
+
+private Task findTaskOrNotify(String prompt) {
+    String taskId = ValidationUtils.getValidatedString(scanner, prompt);
+    Task task = taskService.findTaskById(taskId);
+    if (task == null) {
+        System.out.println("Task not found.");
+    }
+    return task;
+}
+
 
     private  void showError(RuntimeException e){
         System.out.println("Error: " + e.getMessage());
