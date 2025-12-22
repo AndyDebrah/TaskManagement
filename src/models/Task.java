@@ -8,7 +8,7 @@ public class Task implements Completable {
     private final String projectId;
     private final String taskName;
     private final String description;
-    private final String assignedTo;
+    private  String assignedTo;
     private final String priority;
     private String status;
     private final String dueDate;
@@ -42,7 +42,7 @@ public class Task implements Completable {
     public String getTaskName() { return taskName; }
 
     public String getDescription() { return description; }
-//    public String getAssignedTo() { return assignedTo; }public void setAssignedTo(String assignedTo) { this.assignedTo = assignedTo; }
+    public String getAssignedTo() { return assignedTo; }public void setAssignedTo(String assignedTo) { this.assignedTo = assignedTo; }
     public String getPriority() { return priority; }
 //    public void setPriority(String priority) { this.priority = priority; }
     public String getStatus() { return status; }

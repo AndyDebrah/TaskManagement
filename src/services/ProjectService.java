@@ -42,7 +42,6 @@ public class ProjectService {
         }
         validateProjectData(project);
         projects[projectCount++] = project;
-        System.out.println("Project added successfully.");
         return true;
     }
 
@@ -59,7 +58,7 @@ public class ProjectService {
             if (projects[i].getProjectId().equals(projectId)) {
                 validateProjectData(updatedProject);
                 projects[i] = updatedProject;
-                System.out.println("Project updated successfully.");
+
                 return true;
             }
         }
@@ -72,7 +71,6 @@ public class ProjectService {
                 for (int j = i; j < projectCount - 1; j++) projects[j] = projects[j + 1];
                 projects[projectCount - 1] = null;
                 projectCount--;
-                System.out.println("Project deleted successfully.");
                 return true;
             }
         }

@@ -88,7 +88,7 @@ public class TaskService {
                 else{
                     throw new ProjectNotFoundException(projectId);
                 }
-                System.out.println("Task deleted successfully.");
+
                 return;
             }
         }
