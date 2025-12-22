@@ -15,15 +15,14 @@ public class ConsoleMenu {
     private final Scanner scanner;
     private final ProjectService projectService;
     private final TaskService taskService;
-    private final ReportService reportService;
-    private static User currentUser;
+    private final  SessionManager sessionManager;
 
     public ConsoleMenu(ProjectService projectService, TaskService taskService,
-                       ReportService reportService, Scanner scanner) {
+                        Scanner scanner, SessionManager sessionManager) {
         this.scanner = scanner;
         this.projectService = projectService;
         this.taskService = taskService;
-        this.reportService = reportService;
+        this.sessionManager = sessionManager;
     }
 
     public void displayMainMenu() {
@@ -115,19 +114,5 @@ public class ConsoleMenu {
         }
     }
 
-    public static User getCurrentUser() {
-        return currentUser;
-    }
 
-    public static void setCurrentUser(User user) {
-        currentUser = user;
-    }
-
-    // TODO: check it out
-    public static void requirePermission(String permission) {
-        if (!currentUser.hasPermission(permission)) {
-            System.out.println("Error: You do not have permission to perform this action.");
-            throw new SecurityException("Insufficient permissions");
-        }
-    }
 }

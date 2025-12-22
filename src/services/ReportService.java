@@ -1,4 +1,5 @@
 package services;
+import exceptions.EmptyProjectException;
 
 import models.Project;
 import models.Task;
@@ -70,28 +71,31 @@ public class ReportService {
         System.out.println("ASSOCIATED TASKS");
         System.out.printf("Total Tasks: %d%n", projectTasks.length);
 
-        if (projectTasks.length > 0) {
-            int completed = 0;
-            int inProgress = 0;
-            int pending = 0;
-
-            for (Task task : projectTasks) {
-                if (task.getStatus().equals("Completed")) completed++;
-                else if (task.getStatus().equals("In Progress")) inProgress++;
-                else pending++;
-            }
-
-            System.out.printf("Completed Tasks  : %d%n", completed);
-            System.out.printf("In Progress Tasks: %d%n", inProgress);
-            System.out.printf("Pending Tasks     : %d%n", pending);
-            System.out.printf("Task Completion   : %.2f%%%n", taskService.calculateProjectTaskCompletion(projectId));
-
-            System.out.println("Task Details:");
-            for (int i = 0; i < projectTasks.length; i++) {
-                Task task = projectTasks[i];
-                System.out.printf("  [%d] %s - %s (%s)%n", i + 1, task.getTaskName(), task.getStatus(), task.getPriority());
-            }
+        if (projectTasks.length == 0) {
+            throw new EmptyProjectException(projectId);
         }
+        int completed = 0;
+        int inProgress = 0;
+        int pending = 0;
+
+        for (Task task : projectTasks) {
+            if (task.getStatus().equals("Completed")) completed++;
+            else if (task.getStatus().equals("In Progress")) inProgress++;
+            else pending++;
+        }
+
+
+        System.out.printf("Completed Tasks  : %d%n", completed);
+        System.out.printf("In Progress Tasks: %d%n", inProgress);
+        System.out.printf("Pending Tasks     : %d%n", pending);
+        System.out.printf("Task Completion   : %.2f%%%n", taskService.calculateProjectTaskCompletion(projectId));
+
+        System.out.println("Task Details:");
+        for (int i = 0; i < projectTasks.length; i++) {
+            Task task = projectTasks[i];
+            System.out.printf("  [%d] %s - %s (%s)%n", i + 1, task.getTaskName(), task.getStatus(), task.getPriority());
+        }
+
     }
 
     public void generateUserWorkloadReport(String userId) {
@@ -110,14 +114,24 @@ public class ReportService {
 
             for (Task task : userTasks) {
                 switch (task.getStatus()) {
-                    case "Completed": completed++; break;
-                    case "In Progress": inProgress++; break;
-                    default: pending++;
+                    case "Completed":
+                        completed++;
+                        break;
+                    case "In Progress":
+                        inProgress++;
+                        break;
+                    default:
+                        pending++;
                 }
                 switch (task.getPriority()) {
-                    case "High": high++; break;
-                    case "Medium": medium++; break;
-                    default: low++;
+                    case "High":
+                        high++;
+                        break;
+                    case "Medium":
+                        medium++;
+                        break;
+                    default:
+                        low++;
                 }
             }
 

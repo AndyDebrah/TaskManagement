@@ -3,6 +3,7 @@ import services.ProjectService;
 import services.ReportService;
 import services.TaskService;
 import utils.ConsoleMenu;
+import utils.SessionManager;
 import utils.ValidationUtils;
 
 import java.util.Scanner;
@@ -13,8 +14,10 @@ public class ConsoleApp {
     private  final ProjectService projectService;
     private  final  TaskService taskService;
     private final ReportService reportService;
+    private  final SessionManager sessionManager;
 
-     public  ConsoleApp(ConsoleMenu menu, Scanner scanner, ProjectService projectService, TaskService taskService, ReportService reportService) {
+     public  ConsoleApp(ConsoleMenu menu, Scanner scanner, ProjectService projectService, TaskService taskService, ReportService reportService, SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
         this.reportService = reportService;
         this.menu = menu;
         this.scanner = scanner;
@@ -30,7 +33,7 @@ public class ConsoleApp {
 
         int choice = ValidationUtils.getValidatedChoice(scanner, "Select user type (1-2): ", 1, 2);
 
-        User user = null;
+        User user;
         if (choice == 1) {
             user = new AdminUser("ADM001", "Admin User", "admin@projectmgmt.com", "admin123");
             System.out.println("Logged in as Administrator");
@@ -39,14 +42,14 @@ public class ConsoleApp {
             System.out.println("Logged in as Regular User");
         }
 
-        ConsoleMenu.setCurrentUser(user);
-        ConsoleMenu.getCurrentUser().displayUserInfo();
+        sessionManager.login(user);
+        SessionManager.getCurrentUser().displayUserInfo();
         menu.pause();
     }
 
     private  void switchUser() {
         System.out.println("\nSWITCH USER");
-        User current = ConsoleMenu.getCurrentUser();
+        User current = SessionManager.getCurrentUser();
 
         System.out.println("Currently logged in as:" + current.getRole());
         System.out.println("1. Switch to Administrator");
@@ -72,7 +75,7 @@ public class ConsoleApp {
         }
 
         // Update your session user
-        ConsoleMenu.setCurrentUser(newUser);
+        sessionManager.login(newUser);
 
         // Display the new user information
         newUser.displayUserInfo();
@@ -129,7 +132,7 @@ public class ConsoleApp {
 
     private  void createNewProject() {
         try {
-            ConsoleMenu.requirePermission("CREATE_PROJECTS");
+            SessionManager.requirePermission("CREATE_PROJECTS");
             System.out.println("\nCREATE NEW PROJECT");
             System.out.println("Select Project Type: 1) Software  2) Hardware");
             int type = ValidationUtils.getValidatedChoice(scanner, "Enter choice (1-2): ", 1, 2);
@@ -148,7 +151,7 @@ public class ConsoleApp {
                 int budgetInt = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter Budget (whole number): ");
 
                 SoftwareProject project = new SoftwareProject( name, description, startDate, endDate,
-                        (double) budgetInt, teamSize, techStack, methodology, totalFeatures);
+                        budgetInt, teamSize, techStack, methodology, totalFeatures);
                 projectService.addProject(project);
             } else {
                 String hardwareType = ValidationUtils.getValidatedString(scanner, "Enter Hardware Type: ");
@@ -157,7 +160,7 @@ public class ConsoleApp {
                 int budgetInt = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter Budget (whole number): ");
 
                 HardwareProject project = new HardwareProject( name, description, startDate, endDate,
-                        (double) budgetInt, teamSize, hardwareType, totalComponents);
+                        budgetInt, teamSize, hardwareType, totalComponents);
                 projectService.addProject(project);
             }
         } catch (SecurityException se) {
@@ -181,7 +184,7 @@ public class ConsoleApp {
 
     private  void updateProject() {
         try {
-            ConsoleMenu.requirePermission("UPDATE_PROJECTS");
+           SessionManager.requirePermission("UPDATE_PROJECTS");
             String projectId = ValidationUtils.getValidatedString(scanner, "\nEnter Project ID to update: ");
             Project project = projectService.findProjectById(projectId);
             if (project == null) {
@@ -216,7 +219,7 @@ public class ConsoleApp {
 
     private  void deleteProject() {
         try {
-            ConsoleMenu.requirePermission("DELETE_PROJECTS");
+            SessionManager.requirePermission("DELETE_PROJECTS");
             String projectId = ValidationUtils.getValidatedString(scanner, "\nEnter Project ID to delete: ");
             Project project = projectService.findProjectById(projectId);
             if (project != null) {
@@ -310,7 +313,7 @@ public class ConsoleApp {
         try {
 
 
-            ConsoleMenu.requirePermission("CREATE_TASKS");
+            SessionManager.requirePermission("CREATE_TASKS");
 
             System.out.println("\nCREATE NEW TASK");
 
@@ -385,7 +388,7 @@ public class ConsoleApp {
         try {
 
 
-            ConsoleMenu.requirePermission("DELETE_TASKS");
+            SessionManager.requirePermission("DELETE_TASKS");
             String taskId = ValidationUtils.getValidatedString(scanner, "\nEnter Task ID to delete: ");
             Task task = taskService.findTaskById(taskId);
             if (task != null) {
@@ -464,9 +467,9 @@ public class ConsoleApp {
     private  void handleUserManagement() {
         System.out.println("USER MANAGEMENT");
         System.out.println("Current User Information:");
-        ConsoleMenu.getCurrentUser().displayUserInfo();
+        SessionManager.getCurrentUser().displayUserInfo();
         System.out.println("User Permissions:");
-        for (String permission : ConsoleMenu.getCurrentUser().getPermissions()) {
+        for (String permission : SessionManager.getCurrentUser().getPermissions()) {
             System.out.println(" - " + permission);
         }
         menu.pause();

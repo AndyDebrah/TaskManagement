@@ -35,7 +35,7 @@ public class TaskService {
     }
 
 
-    public boolean addTask(Task task) {
+    public void addTask(Task task) {
         if (taskCount >= MAX_TASKS) {
             throw new InvalidInputException("Error: Maximum task limit reached!");
         }
@@ -43,18 +43,16 @@ public class TaskService {
            throw new InvalidInputException("Error: Task ID already exists!");
         }
         validateTaskData(task);
-        tasks[taskCount++] = task;
-        if (projectService != null) {
-            models.Project project = projectService.findProjectById(task.getProjectId());
-            if (project != null) project.addTask(task);
-
-        }
-        else {
+        if(projectService==null){
             throw new ProjectNotFoundException(task.getProjectId());
         }
+        models.Project project = projectService.findProjectById(task.getProjectId());
+        if (project == null) {
+            throw new ProjectNotFoundException(task.getProjectId());
+        }
+        tasks[taskCount++] = task;
+        project.addTask(task);
         System.out.println("Task added successfully.");
-        return true;
-
 
 
     }
@@ -64,19 +62,19 @@ public class TaskService {
         return null;
     }
 
-    public boolean updateTask(String taskId, Task updatedTask) {
+    public void updateTask(String taskId, Task updatedTask) {
         for (int i = 0; i < taskCount; i++) {
             if (tasks[i].getTaskId().equals(taskId)) {
                 validateTaskData(updatedTask);
                 tasks[i] = updatedTask;
                 System.out.println("Task updated successfully.");
-                return true;
+                return;
             }
         }
         throw new TaskNotFoundException(taskId);
     }
 
-    public boolean deleteTask(String taskId) {
+    public void deleteTask(String taskId) {
         for (int i = 0; i < taskCount; i++) {
             if (tasks[i].getTaskId().equals(taskId)) {
                 String projectId = tasks[i].getProjectId();
@@ -91,10 +89,10 @@ public class TaskService {
                     throw new ProjectNotFoundException(projectId);
                 }
                 System.out.println("Task deleted successfully.");
-                return true;
+                return;
             }
         }
-       throw new TaskNotFoundException("taskId");
+       throw new TaskNotFoundException(taskId);
     }
 
     public Task[] getAllTasks() {

@@ -1,4 +1,6 @@
 package utils;
+import exceptions.InvalidInputException;
+
 
 import java.util.Scanner;
 
@@ -251,25 +253,33 @@ public class ValidationUtils {
     }
     public static void requireNonEmpty(String input, String fieldName) {
         if (!isValidString(input)) {
-            throw new IllegalArgumentException(fieldName + " cannot be null or empty.");
+            throw new InvalidInputException(fieldName + " cannot be null or empty.");
+
         }
     }
 
     public static void requirePositive(int number, String fieldName) {
         if (number <= 0) {
-            throw new IllegalArgumentException(fieldName + " must be a positive integer.");
+            throw new InvalidInputException(fieldName + " cannot be null or empty.");
+
         }
     }
 
     public static void requireValidPriority(String priority) {
         if (!isValidPriority(priority)) {
-            throw new IllegalArgumentException("Invalid priority value: " + priority);
+            throw new InvalidInputException("Invalid priority value: " + priority);
+
         }
     }
 
     public static void requireValidStatus(String status) {
         if (!isValidStatus(status)) {
-            throw new IllegalArgumentException("Invalid status value: " + status);
+            throw new InvalidInputException("Invalid status value: " + status);
+        }
+    }
+    public static void requireValidEmail(String email) {
+        if (!isValidEmail(email)) {
+            throw new InvalidInputException("Invalid email format: " + email);
         }
     }
 }

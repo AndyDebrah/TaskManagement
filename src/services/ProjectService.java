@@ -13,7 +13,7 @@ import utils.ValidationUtils;
 
 /** Service class for managing project operations (in-memory). */
 public class ProjectService {
-    private Project[] projects;
+    private final Project[] projects;
     private int projectCount;
     private static final int MAX_PROJECTS = 100;
 
@@ -86,17 +86,14 @@ public class ProjectService {
         ValidationUtils.requireNonEmpty(project.getProjectId(), "Project ID");
         ValidationUtils.requireNonEmpty(project.getProjectName(), "Project Name");
         ValidationUtils.requireNonEmpty(project.getStatus(), "Project Status");
-        ValidationUtils.requireNonEmpty(project.getProjectId(), "Description");
-        if(project.getTeamSize() <=1){
+        ValidationUtils.requireNonEmpty(project.getDescription(), "Description");
+        if(project.getTeamSize() <=0){
             throw new InvalidProjectDataException("Error: Team size must be positive!");
 
         }
-        if (project.getBudget() <1){
+        if (project.getBudget() <=0){
             throw new InvalidProjectDataException("Error: Budget cannot be negative!");
         }
-
-
-
     }
 
     public Project[] getAllProjects() {

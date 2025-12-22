@@ -14,7 +14,7 @@ public class Seed {
                 "2025-01-01",
                 100000.00,
                 10,
-                "Java, Spring Boot, React, PostgreSQL",
+                "Java, Spring Boot, React, PostgresSQL",
                 "Agile",
                 10
         );
@@ -54,40 +54,33 @@ public class Seed {
     public static  Task[] seedTasks(){
         Task[] tasks = new Task[100];
 
-        Task task = new Task("TASK001", "PROJ001", "Implement User Authentication",
-                "Create secure login and registration system", "USR001", "High");
+        Task task = new Task("TSK0001", "PROJ001", "Implement User Authentication",
+                "Create secure login and registration system", "USR001", "High", "2025-01-15");
         task.setStatus("Completed");
         tasks[0] = task;
-        Task task2 = new Task("TASK002", "PROJ001", "Design Product Catalog",
-                "Create responsive product listing interface", "USR002", "High");
+        Task task2 = new Task("TSK0002", "PROJ001", "Design Product Catalog",
+                "Create responsive product listing interface", "USR002", "High", "2025-01-18");
+        task2.setStatus("In Progress");
         task2.setStatus("In Progress");
         tasks[1] = task2;
-        Task task3 = new Task("TASK003", "PROJ001", "Integrate Payment Gateway",
-                "Add Stripe payment processing", "USR001", "High");
+        Task task3 = new Task("TSK0003", "PROJ001", "Integrate Payment Gateway",
+                "Add Stripe payment processing", "USR001", "High", "2025-01-21");
         tasks[2] = task3;
-        Task task4 = new Task("TASK004", "PROJ002", "Setup Firebase Backend",
-                "Configure Firebase authentication and database", "USR003", "Medium");
+        Task task4 = new Task("TSK0004", "PROJ002", "Setup Firebase Backend",
+                "Configure Firebase authentication and database", "USR003", "Medium", "2025-02-05");
         task4.setStatus("Completed");
         tasks[3] = task4;
-        Task task5 = new Task("TASK005", "PROJ003", "PCB Design Review",
-                "Review and finalize circuit board design", "USR002", "High");
+        Task task5 = new Task("TSK0005", "PROJ003", "PCB Design Review",
+                "Review and finalize circuit board design", "USR002", "High", "2025-03-02");
       tasks[4] = task5;
 
         return tasks;
     }
 
-    private static AdminUser defaultAdmin =
+    private static final AdminUser defaultAdmin =
             new AdminUser("ADMIN-001", "System Admin", "admin@app.com", "admin123");
 
-    private static RegularUser defaultRegular =
+    private static final RegularUser defaultRegular =
             new RegularUser("USER-001", "Default User", "user@app.com", "user123");
-
-    public static AdminUser getDefaultAdmin() {
-        return defaultAdmin;
-    }
-
-    public static RegularUser getDefaultRegular() {
-        return defaultRegular;
-    }
 
 }
