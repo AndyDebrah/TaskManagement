@@ -17,11 +17,6 @@ public class ProjectService {
     private int projectCount;
     private static final int MAX_PROJECTS = 100;
 
-    public ProjectService() {
-        this.projects = new Project[MAX_PROJECTS];
-        this.projectCount = 0;
-    }
-
     public ProjectService(Project[] seededProjects) {
         this.projects = new Project[MAX_PROJECTS];
         this.projectCount = 0;
@@ -32,7 +27,7 @@ public class ProjectService {
         }
     }
 
-    public boolean addProject(Project project) {
+    public void addProject(Project project) {
         if (projectCount >= MAX_PROJECTS) {
             throw new InvalidProjectDataException("Error: Maximum project limit reached!");
         }
@@ -42,7 +37,6 @@ public class ProjectService {
         }
         validateProjectData(project);
         projects[projectCount++] = project;
-        return true;
     }
 
     public Project findProjectById(String projectId) {
@@ -53,25 +47,25 @@ public class ProjectService {
     }
 
 
-    public boolean updateProject(String projectId, Project updatedProject) {
+    public void updateProject(String projectId, Project updatedProject) {
         for (int i = 0; i < projectCount; i++) {
             if (projects[i].getProjectId().equals(projectId)) {
                 validateProjectData(updatedProject);
                 projects[i] = updatedProject;
 
-                return true;
+                return;
             }
         }
        throw new ProjectNotFoundException(projectId);
     }
 
-    public boolean deleteProject(String projectId) {
+    public void deleteProject(String projectId) {
         for (int i = 0; i < projectCount; i++) {
             if (projects[i].getProjectId().equals(projectId)) {
                 for (int j = i; j < projectCount - 1; j++) projects[j] = projects[j + 1];
                 projects[projectCount - 1] = null;
                 projectCount--;
-                return true;
+                return;
             }
         }
        throw new ProjectNotFoundException(projectId);
@@ -96,7 +90,7 @@ public class ProjectService {
 
     public Project[] getAllProjects() {
         Project[] result = new Project[projectCount];
-        for (int i = 0; i < projectCount; i++) result[i] = projects[i];
+        System.arraycopy(projects, 0, result, 0, projectCount);
         return result;
     }
 

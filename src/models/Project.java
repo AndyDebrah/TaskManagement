@@ -3,15 +3,15 @@ package models;
 /** Common abstract project class. */
 public abstract class Project {
     private static int projectCounter = 1;
-    private String projectId;
+    private final String projectId;
     private String projectName;
     private String description;
-    private String startDate;
+    private final String startDate;
     private String endDate;
     private String status;
-    private double budget;
-    private int teamSize;
-    private Task[] tasks;
+    private final double budget;
+    private final int teamSize;
+    private final Task[] tasks;
     private int taskCount;
     private static final int MAX_TASKS_PER_PROJECT = 200;
     private String generateProjectId() {
@@ -32,21 +32,20 @@ public abstract class Project {
     }
 
     public String getProjectId() { return projectId; }
-    public void setProjectId(String projectId) { this.projectId = projectId; }
+
     public String getProjectName() { return projectName; }
     public void setProjectName(String projectName) { this.projectName = projectName; }
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
     public String getStartDate() { return startDate; }
-    public void setStartDate(String startDate) { this.startDate = startDate; }
+
     public String getEndDate() { return endDate; }
     public void setEndDate(String endDate) { this.endDate = endDate; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
     public double getBudget() { return budget; }
-    public void setBudget(double budget) { this.budget = budget; }
+
     public int getTeamSize() { return teamSize; }
-    public void setTeamSize(int teamSize) { this.teamSize = teamSize; }
 
     public abstract double calculateCompletionPercentage();
     public abstract String getProjectType();
@@ -66,72 +65,36 @@ public abstract class Project {
         System.out.println(getProjectDetails());
     }
 
-    /**
-     * Returns a formatted, non-interactive representation of the project suitable
-     * for inclusion in programmatic reports. This mirrors the output of
-     * displayProjectInfo() but returns the result as a String so callers (like
-     * ReportService) can decide how to present it.
-     */
-    public String getDisplayString() {
-        return String.format(
-            "Project ID   : %s%n" +
-            "Name         : %s%n" +
-            "Type         : %s%n" +
-            "Description  : %s%n" +
-            "Start Date   : %s%n" +
-            "End Date     : %s%n" +
-            "Team Size    : %d%n" +
-            "Budget       : $%.2f%n" +
-            "Status       : %s%n" +
-            "Completion   : %.2f%%%n" +
-            "%s",
-            getProjectId(),
-            getProjectName(),
-            getProjectType(),
-            getDescription(),
-            getStartDate(),
-            getEndDate(),
-            getTeamSize(),
-            getBudget(),
-            getStatus(),
-            calculateCompletionPercentage(),
-            getProjectDetails()
-        );
-    }
-
     @Override
     public String toString() {
         return String.format("Project[ID=%s, Name=%s, Type=%s, Status=%s, Completion=%.2f%%]",
                 projectId, projectName, getProjectType(), status, calculateCompletionPercentage());
     }
 
-    public boolean addTask(Task task) {
-        if (taskCount >= MAX_TASKS_PER_PROJECT) return false;
+    public void addTask(Task task) {
+        if (taskCount >= MAX_TASKS_PER_PROJECT) return;
         for (int i = 0; i < taskCount; i++) {
-            if (tasks[i].getTaskId().equals(task.getTaskId())) return false;
+            if (tasks[i].getTaskId().equals(task.getTaskId())) return;
         }
         tasks[taskCount++] = task;
-        return true;
     }
 
-    public boolean removeTask(String taskId) {
+    public void removeTask(String taskId) {
         for (int i = 0; i < taskCount; i++) {
             if (tasks[i].getTaskId().equals(taskId)) {
                 for (int j = i; j < taskCount - 1; j++) tasks[j] = tasks[j + 1];
                 tasks[taskCount - 1] = null;
                 taskCount--;
-                return true;
+                return;
             }
         }
-        return false;
     }
 
     public Task[] getTasks() {
         Task[] result = new Task[taskCount];
-        for (int i = 0; i < taskCount; i++) result[i] = tasks[i];
+        System.arraycopy(tasks, 0, result, 0, taskCount);
         return result;
     }
 
-    public int getTaskCount() { return taskCount; }
 }
 

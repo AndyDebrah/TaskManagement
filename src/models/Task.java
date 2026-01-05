@@ -8,7 +8,7 @@ public class Task implements Completable {
     private final String projectId;
     private final String taskName;
     private final String description;
-    private String assignedTo;
+    private final String assignedTo;
     private final String priority;
     private String status;
     private final String dueDate;
@@ -46,8 +46,6 @@ public class Task implements Completable {
 
     public String getAssignedTo() { return assignedTo; }
 
-    public void setAssignedTo(String assignedTo) { this.assignedTo = assignedTo; }
-
     public String getPriority() { return priority; }
 
     public String getStatus() { return status; }
@@ -82,15 +80,6 @@ public class Task implements Completable {
         System.out.printf("Status     : %s%n", status);
         System.out.printf("Due Date   : %s%n", dueDate);
         System.out.printf("Description : %s%n", description);
-    }
-
-    public int getPriorityWeight() {
-        return switch (priority.toLowerCase()) {
-            case "high" -> 3;
-            case "medium" -> 2;
-            case "low" -> 1;
-            default -> 0;
-        };
     }
 
     @Override

@@ -17,32 +17,21 @@ public class ValidationUtils {
      * Validate that a string is not null or empty
      */
     public static boolean isValidString(String input) {
-        return input != null && !input.trim().isEmpty();
-    }
-
-    /**
-     * Validate email format
-     * Simple validation - checks for @ and .
-     */
-    public static boolean isValidEmail(String email) {
-        if (!isValidString(email)) {
-            return false;
-        }
-        return email.contains("@") && email.contains(".");
+        return input == null || input.trim().isEmpty();
     }
 
     /**
      * Validate date format (YYYY-MM-DD)
      */
     public static boolean isValidDate(String date) {
-        if (!isValidString(date)) {
-            return false;
+        if (isValidString(date)) {
+            return true;
         }
 
         // Simple format validation
         String[] parts = date.split("-");
         if (parts.length != 3) {
-            return false;
+            return true;
         }
 
         try {
@@ -50,11 +39,11 @@ public class ValidationUtils {
             int month = Integer.parseInt(parts[1]);
             int day = Integer.parseInt(parts[2]);
 
-            return year > 2000 && year < 2100 &&
-                    month >= 1 && month <= 12 &&
-                    day >= 1 && day <= 31;
+            return year <= 2000 || year >= 2100 ||
+                    month < 1 || month > 12 ||
+                    day < 1 || day > 31;
         } catch (NumberFormatException e) {
-            return false;
+            return true;
         }
     }
 
@@ -93,7 +82,7 @@ public class ValidationUtils {
      * Validate status value
      */
     public static boolean isValidStatus(String status) {
-        if (!isValidString(status)) {
+        if (isValidString(status)) {
             return false;
         }
 
@@ -111,7 +100,7 @@ public class ValidationUtils {
      * Validate priority value
      */
     public static boolean isValidPriority(String priority) {
-        if (!isValidString(priority)) {
+        if (isValidString(priority)) {
             return false;
         }
 
@@ -125,16 +114,16 @@ public class ValidationUtils {
     }
     public static boolean isValidTextField(String input) {
 
-        if(!isValidString(input)) {
-            return false;
+        if(isValidString(input)) {
+            return true;
         }
         String trimmed = input.trim();
         if (trimmed.length()<3 || trimmed.length()>50){
-            return false;
+            return true;
         }
 
 
-        return input.matches(".*[A-Za-z].*");
+        return !input.matches(".*[A-Za-z].*");
     }
 
     public static String getValidatedTextField(Scanner scanner, String prompt, String fieldName) {
@@ -142,11 +131,11 @@ public class ValidationUtils {
         do {
             System.out.print(prompt);
             input = scanner.nextLine().trim();
-            if (!isValidTextField(input)) {
+            if (isValidTextField(input)) {
                 System.out.println("❌ " + fieldName + " must be at least 3 characters and contain letters (not only numbers).");
 
             }
-        } while (!isValidTextField(input));
+        } while (isValidTextField(input));
         return input;
     }
     /**
@@ -157,29 +146,11 @@ public class ValidationUtils {
         do {
             System.out.print(prompt);
             input = scanner.nextLine().trim();
-            if (!isValidString(input)) {
+            if (isValidString(input)) {
                 System.out.println("❌ Invalid input! Please enter a valid value.");
             }
-        } while (!isValidString(input));
+        } while (isValidString(input));
         return input;
-    }
-
-    /**
-     * Get validated integer input from user
-     */
-    public static int getValidatedInteger(Scanner scanner, String prompt) {
-        int value;
-        while (true) {
-            System.out.print(prompt);
-            String input = scanner.nextLine().trim();
-            if (isValidInteger(input)) {
-                value = Integer.parseInt(input);
-                break;
-            } else {
-                System.out.println("❌ Invalid input! Please enter a valid number.");
-            }
-        }
-        return value;
     }
 
     /**
@@ -208,26 +179,11 @@ public class ValidationUtils {
         do {
             System.out.print(prompt);
             date = scanner.nextLine().trim();
-            if (!isValidDate(date)) {
+            if (isValidDate(date)) {
                 System.out.println("❌ Invalid date! Use format YYYY-MM-DD.");
             }
-        } while (!isValidDate(date));
+        } while (isValidDate(date));
         return date;
-    }
-
-    /**
-     * Get validated email input
-     */
-    public static String getValidatedEmail(Scanner scanner, String prompt) {
-        String email;
-        do {
-            System.out.print(prompt);
-            email = scanner.nextLine().trim();
-            if (!isValidEmail(email)) {
-                System.out.println("❌ Invalid email format!");
-            }
-        } while (!isValidEmail(email));
-        return email;
     }
 
     /**
@@ -252,14 +208,7 @@ public class ValidationUtils {
         return choice;
     }
     public static void requireNonEmpty(String input, String fieldName) {
-        if (!isValidString(input)) {
-            throw new InvalidInputException(fieldName + " cannot be null or empty.");
-
-        }
-    }
-
-    public static void requirePositive(int number, String fieldName) {
-        if (number <= 0) {
+        if (isValidString(input)) {
             throw new InvalidInputException(fieldName + " cannot be null or empty.");
 
         }
@@ -275,11 +224,6 @@ public class ValidationUtils {
     public static void requireValidStatus(String status) {
         if (!isValidStatus(status)) {
             throw new InvalidInputException("Invalid status value: " + status);
-        }
-    }
-    public static void requireValidEmail(String email) {
-        if (!isValidEmail(email)) {
-            throw new InvalidInputException("Invalid email format: " + email);
         }
     }
 }

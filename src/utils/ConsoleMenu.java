@@ -2,9 +2,7 @@ package utils;
 
 import java.util.Scanner;
 
-import models.User;
 import services.ProjectService;
-import services.ReportService;
 import services.TaskService;
 
 /**
@@ -15,14 +13,12 @@ public class ConsoleMenu {
     private final Scanner scanner;
     private final ProjectService projectService;
     private final TaskService taskService;
-    private final  SessionManager sessionManager;
 
     public ConsoleMenu(ProjectService projectService, TaskService taskService,
-                        Scanner scanner, SessionManager sessionManager) {
+                        Scanner scanner) {
         this.scanner = scanner;
         this.projectService = projectService;
         this.taskService = taskService;
-        this.sessionManager = sessionManager;
     }
 
     public void displayMainMenu() {
@@ -106,12 +102,6 @@ public class ConsoleMenu {
         System.out.println("Press Enter to continue...");
         // use the shared scanner provided by Main
         scanner.nextLine();
-    }
-
-    public void clearScreen() {
-        for (int i = 0; i < 50; i++) {
-            System.out.println();
-        }
     }
 
 

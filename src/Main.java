@@ -17,7 +17,7 @@ void main() {
     final Scanner scanner;
 
     scanner = new Scanner(System.in);
-    menu = new ConsoleMenu(projectService, taskService, scanner, sessionManager);
+    menu = new ConsoleMenu(projectService, taskService, scanner);
     ConsoleApp app = new ConsoleApp(menu, scanner, projectService, taskService, reportService, sessionManager);
     app.runApplication();
 

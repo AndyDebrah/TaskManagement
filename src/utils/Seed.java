@@ -77,10 +77,9 @@ public class Seed {
         return tasks;
     }
 
-    private static final AdminUser defaultAdmin =
-            new AdminUser("ADMIN-001", "System Admin", "admin@app.com", "admin123");
-
-    private static final RegularUser defaultRegular =
-            new RegularUser("USER-001", "Default User", "user@app.com", "user123");
+    static {
+        new AdminUser("ADMIN-001", "System Admin", "admin@app.com", "admin123");
+        new RegularUser("USER-001", "Default User", "user@app.com", "user123");
+    }
 
 }
