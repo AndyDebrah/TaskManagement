@@ -14,62 +14,88 @@ public class ReportService {
         this.taskService = taskService;
     }
 
-    public void generateStatusReport() {
-        System.out.println("SYSTEM STATUS REPORT");
+    public String generateStatusReport() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SYSTEM STATUS REPORT\n\n");
 
         Project[] allProjects = projectService.getAllProjects();
-        System.out.println("PROJECT STATISTICS");
-        System.out.printf("Total Projects     : %d%n", allProjects.length);
-        System.out.printf("Average Completion : %.2f%%%n", projectService.getAverageCompletion());
+        sb.append("PROJECT STATISTICS\n");
+        sb.append(String.format("Total Projects     : %d%n", allProjects.length));
+        sb.append(String.format("Average Completion : %.2f%%%n\n", projectService.getAverageCompletion()));
 
         Project[] activeProjects = projectService.getProjectsByStatus("Active");
         Project[] completedProjects = projectService.getProjectsByStatus("Completed");
         Project[] onHoldProjects = projectService.getProjectsByStatus("On Hold");
 
-        System.out.printf("Active Projects    : %d%n", activeProjects.length);
-        System.out.printf("Completed Projects : %d%n", completedProjects.length);
-        System.out.printf("On Hold Projects   : %d%n", onHoldProjects.length);
+        sb.append(String.format("Active Projects    : %d%n", activeProjects.length));
+        sb.append(String.format("Completed Projects : %d%n", completedProjects.length));
+        sb.append(String.format("On Hold Projects   : %d%n\n", onHoldProjects.length));
 
         Task[] allTasks = taskService.getAllTasks();
-        System.out.println("TASK STATISTICS");
-        System.out.printf("Total Tasks        : %d%n", allTasks.length);
+        sb.append("TASK STATISTICS\n");
+        sb.append(String.format("Total Tasks        : %d%n\n", allTasks.length));
 
         Task[] pendingTasks = taskService.getTasksByStatus("Pending");
         Task[] inProgressTasks = taskService.getTasksByStatus("In Progress");
         Task[] completedTasks = taskService.getTasksByStatus("Completed");
 
-        System.out.printf("Pending Tasks      : %d%n", pendingTasks.length);
-        System.out.printf("In Progress Tasks  : %d%n", inProgressTasks.length);
-        System.out.printf("Completed Tasks    : %d%n", completedTasks.length);
+        sb.append(String.format("Pending Tasks      : %d%n", pendingTasks.length));
+        sb.append(String.format("In Progress Tasks  : %d%n", inProgressTasks.length));
+        sb.append(String.format("Completed Tasks    : %d%n", completedTasks.length));
 
         if (allTasks.length > 0) {
             double taskCompletionRate = (completedTasks.length * 100.0) / allTasks.length;
-            System.out.printf("Task Completion Rate: %.2f%%%n", taskCompletionRate);
+            sb.append(String.format("Task Completion Rate: %.2f%%%n\n", taskCompletionRate));
+        } else {
+            sb.append("\n");
         }
 
         Task[] highPriority = taskService.getTasksByPriority("High");
         Task[] mediumPriority = taskService.getTasksByPriority("Medium");
         Task[] lowPriority = taskService.getTasksByPriority("Low");
 
-        System.out.println("TASK PRIORITY BREAKDOWN");
-        System.out.printf("High   : %d%n", highPriority.length);
-        System.out.printf("Medium : %d%n", mediumPriority.length);
-        System.out.printf("Low    : %d%n", lowPriority.length);
+        sb.append("TASK PRIORITY BREAKDOWN\n");
+        sb.append(String.format("High   : %d%n", highPriority.length));
+        sb.append(String.format("Medium : %d%n", mediumPriority.length));
+        sb.append(String.format("Low    : %d%n", lowPriority.length));
+
+        return sb.toString();
     }
 
-    public void generateProjectReport(String projectId) {
+    public String generateProjectReport(String projectId) {
+        StringBuilder sb = new StringBuilder();
         Project project = projectService.findProjectById(projectId);
         if (project == null) {
-            System.out.println("Error: Project not found!");
-            return;
+            return "Error: Project not found!";
         }
 
-        System.out.println("PROJECT DETAILED REPORT");
-        project.displayProjectInfo();
+        sb.append("PROJECT DETAILED REPORT\n");
+        sb.append(String.format(
+                "Project ID   : %s%n" +
+                        "Name         : %s%n" +
+                        "Type         : %s%n" +
+                        "Description  : %s%n" +
+                        "Start Date   : %s%n" +
+                        "End Date     : %s%n" +
+                        "Team Size    : %d%n" +
+                        "Budget       : $%.2f%n" +
+                        "Status       : %s%n" +
+                        "Completion   : %.2f%%%n%n",
+                project.getProjectId(),
+                project.getProjectName(),
+                project.getProjectType(),
+                project.getDescription(),
+                project.getStartDate(),
+                project.getEndDate(),
+                project.getTeamSize(),
+                project.getBudget(),
+                project.getStatus(),
+                project.calculateCompletionPercentage()
+        ));
 
         Task[] projectTasks = taskService.getTasksByProjectId(projectId);
-        System.out.println("ASSOCIATED TASKS");
-        System.out.printf("Total Tasks: %d%n", projectTasks.length);
+        sb.append("ASSOCIATED TASKS\n");
+        sb.append(String.format("Total Tasks: %d%n\n", projectTasks.length));
 
         if (projectTasks.length == 0) {
             throw new EmptyProjectException(projectId);
@@ -85,24 +111,26 @@ public class ReportService {
         }
 
 
-        System.out.printf("Completed Tasks  : %d%n", completed);
-        System.out.printf("In Progress Tasks: %d%n", inProgress);
-        System.out.printf("Pending Tasks     : %d%n", pending);
-        System.out.printf("Task Completion   : %.2f%%%n", taskService.calculateProjectTaskCompletion(projectId));
+        sb.append(String.format("Completed Tasks  : %d%n", completed));
+        sb.append(String.format("In Progress Tasks: %d%n", inProgress));
+        sb.append(String.format("Pending Tasks     : %d%n", pending));
+        sb.append(String.format("Task Completion   : %.2f%%%n\n", taskService.calculateProjectTaskCompletion(projectId)));
 
-        System.out.println("Task Details:");
+        sb.append("Task Details:\n");
         for (int i = 0; i < projectTasks.length; i++) {
             Task task = projectTasks[i];
-            System.out.printf("  [%d] %s - %s (%s)%n", i + 1, task.getTaskName(), task.getStatus(), task.getPriority());
+            sb.append(String.format("  [%d] %s - %s (%s)%n", i + 1, task.getTaskName(), task.getStatus(), task.getPriority()));
         }
 
+        return sb.toString();
     }
 
-    public void generateUserWorkloadReport(String userId) {
+    public String generateUserWorkloadReport(String userId) {
+        StringBuilder sb = new StringBuilder();
         Task[] userTasks = taskService.getTasksByUserId(userId);
-        System.out.println("USER WORKLOAD REPORT");
-        System.out.printf("User ID: %s%n", userId);
-        System.out.printf("Total Assigned Tasks: %d%n", userTasks.length);
+        sb.append("USER WORKLOAD REPORT\n");
+        sb.append(String.format("User ID: %s%n", userId));
+        sb.append(String.format("Total Assigned Tasks: %d%n\n", userTasks.length));
 
         if (userTasks.length > 0) {
             int completed = 0;
@@ -135,18 +163,20 @@ public class ReportService {
                 }
             }
 
-            System.out.println("Status Breakdown:");
-            System.out.printf("Completed   : %d%n", completed);
-            System.out.printf("In Progress : %d%n", inProgress);
-            System.out.printf("Pending     : %d%n", pending);
+            sb.append("Status Breakdown:\n");
+            sb.append(String.format("Completed   : %d%n", completed));
+            sb.append(String.format("In Progress : %d%n", inProgress));
+            sb.append(String.format("Pending     : %d%n\n", pending));
 
-            System.out.println("Priority Breakdown:");
-            System.out.printf("High   : %d%n", high);
-            System.out.printf("Medium : %d%n", medium);
-            System.out.printf("Low    : %d%n", low);
+            sb.append("Priority Breakdown:\n");
+            sb.append(String.format("High   : %d%n", high));
+            sb.append(String.format("Medium : %d%n", medium));
+            sb.append(String.format("Low    : %d%n\n", low));
 
             double completionRate = (completed * 100.0) / userTasks.length;
-            System.out.printf("Completion Rate: %.2f%%%n", completionRate);
+            sb.append(String.format("Completion Rate: %.2f%%%n", completionRate));
         }
+
+        return sb.toString();
     }
 }

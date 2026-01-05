@@ -9,14 +9,14 @@ import utils.ValidationUtils;
 import java.util.Scanner;
 
 public class ConsoleApp {
-    private  final ConsoleMenu menu;
-    private  final Scanner scanner;
-    private  final ProjectService projectService;
-    private  final  TaskService taskService;
+    private final ConsoleMenu menu;
+    private final Scanner scanner;
+    private final ProjectService projectService;
+    private final TaskService taskService;
     private final ReportService reportService;
-    private  final SessionManager sessionManager;
+    private final SessionManager sessionManager;
 
-     public  ConsoleApp(ConsoleMenu menu, Scanner scanner, ProjectService projectService, TaskService taskService, ReportService reportService, SessionManager sessionManager) {
+    public ConsoleApp(ConsoleMenu menu, Scanner scanner, ProjectService projectService, TaskService taskService, ReportService reportService, SessionManager sessionManager) {
         this.sessionManager = sessionManager;
         this.reportService = reportService;
         this.menu = menu;
@@ -25,7 +25,7 @@ public class ConsoleApp {
         this.taskService = taskService;
     }
 
-    private  void simulateLogin() {
+    private void simulateLogin() {
         System.out.println("\nAUTHENTICATION");
         System.out.println("Login as:");
         System.out.println("1. Administrator");
@@ -43,13 +43,13 @@ public class ConsoleApp {
         }
 
         sessionManager.login(user);
-        SessionManager.getCurrentUser().displayUserInfo();
+        sessionManager.getCurrentUser().displayUserInfo();
         menu.pause();
     }
 
-    private  void switchUser() {
+    private void switchUser() {
         System.out.println("\nSWITCH USER");
-        User current = SessionManager.getCurrentUser();
+        User current = sessionManager.getCurrentUser();
 
         System.out.println("Currently logged in as:" + current.getRole());
         System.out.println("1. Switch to Administrator");
@@ -59,13 +59,12 @@ public class ConsoleApp {
         int choice = ValidationUtils.getValidatedChoice(scanner, "Select user type (0-2): ", 0, 2);
 
         if (choice == 0) {
-            System.out.println( "User switch cancelled." );
+            System.out.println("User switch cancelled.");
             menu.pause();
             return;
         }
+
         User newUser;
-
-
         if (choice == 1) {
             newUser = new AdminUser("ADM001", "Admin User", "admin@system.com", "admin-pass");
             System.out.println("You are now logged in as ADMIN.");
@@ -74,38 +73,38 @@ public class ConsoleApp {
             System.out.println("You are now logged in as REGULAR USER.");
         }
 
-        // Update your session user
         sessionManager.login(newUser);
-
-        // Display the new user information
-        newUser.displayUserInfo();
+        sessionManager.getCurrentUser().displayUserInfo();
         menu.pause();
     }
 
-    public   void runApplication() {
+    public void runApplication() {
         menu.displayWelcomeBanner();
         simulateLogin();
         boolean running = true;
         while (running) {
             menu.displayMainMenu();
             int choice = ValidationUtils.getValidatedChoice(scanner, "Enter your choice: ", 0, 6);
-            try{
+            try {
                 switch (choice) {
                     case 1 -> handleProjectManagement();
                     case 2 -> handleTaskManagement();
                     case 3 -> handleUserManagement();
                     case 4 -> handleReports();
-                    case 5 -> { menu.displaySystemStats(); menu.pause(); }
+                    case 5 -> {
+                        menu.displaySystemStats();
+                        menu.pause();
+                    }
                     case 6 -> switchUser();
                     case 0 -> running = false;
                 }
-            }catch (RuntimeException e){
+            } catch (RuntimeException e) {
                 showError(e);
             }
         }
     }
 
-    private  void handleProjectManagement() {
+    private void handleProjectManagement() {
         boolean inProjectMenu = true;
         while (inProjectMenu) {
             menu.displayProjectMenu();
@@ -114,7 +113,17 @@ public class ConsoleApp {
                 switch (choice) {
                     case 1 -> createNewProject();
                     case 2 -> {
-                        projectService.displayAllProjects();
+                        Project[] all = projectService.getAllProjects();
+                        if (all.length == 0) {
+                            System.out.println("No projects available.");
+                        } else {
+                            System.out.println("PROJECT CATALOG");
+                            for (int i = 0; i < all.length; i++) {
+                                System.out.printf("\n[%d] ", i + 1);
+                                all[i].displayProjectInfo();
+                            }
+                            System.out.println("Total Projects: " + all.length);
+                        }
                         menu.pause();
                     }
                     case 3 -> searchProject();
@@ -124,15 +133,15 @@ public class ConsoleApp {
                     case 7 -> filterProjectsByType();
                     case 0 -> inProjectMenu = false;
                 }
-            }catch (RuntimeException e){
+            } catch (RuntimeException e) {
                 showError(e);
             }
         }
     }
 
-    private  void createNewProject() {
+    private void createNewProject() {
         try {
-            SessionManager.requirePermission("CREATE_PROJECTS");
+            sessionManager.requirePermission("CREATE_PROJECTS");
             System.out.println("\nCREATE NEW PROJECT");
             System.out.println("Select Project Type: 1) Software  2) Hardware");
             int type = ValidationUtils.getValidatedChoice(scanner, "Enter choice (1-2): ", 1, 2);
@@ -150,6 +159,7 @@ public class ConsoleApp {
         }
         menu.pause();
     }
+
     private SoftwareProject readSoftwareProjectFromInput() {
         String name = ValidationUtils.getValidatedTextField(scanner,
                 "Enter Project Name: ", "Project Name");
@@ -185,10 +195,8 @@ public class ConsoleApp {
                 budgetInt, teamSize, hardwareType, totalComponents);
     }
 
-
-
-private void searchProject() {
-    Project project = findProjectOrNotify();
+    private void searchProject() {
+        Project project = findProjectOrNotify();
         if (project != null) {
             System.out.println("Project Found:");
             project.displayProjectInfo();
@@ -197,9 +205,9 @@ private void searchProject() {
 
     }
 
-private void updateProject() {
+    private void updateProject() {
         try {
-           SessionManager.requirePermission("UPDATE_PROJECTS");
+            sessionManager.requirePermission("UPDATE_PROJECTS");
             String projectId = ValidationUtils.getValidatedString(scanner, "\nEnter Project ID to update: ");
             Project project = projectService.findProjectById(projectId);
             if (project == null) {
@@ -224,18 +232,17 @@ private void updateProject() {
                 projectService.updateProject(projectId, project);
                 System.out.println("Project updated successfully.");
                 menu.pause();
-            } catch (RuntimeException e){
+            } catch (RuntimeException e) {
                 showError(e);
             }
-        }
-        catch (SecurityException se) {
+        } catch (SecurityException se) {
             System.out.println("Permission Denied: " + se.getMessage());
         }
     }
 
-private void deleteProject() {
+    private void deleteProject() {
         try {
-            SessionManager.requirePermission("DELETE_PROJECTS");
+            sessionManager.requirePermission("DELETE_PROJECTS");
             String projectId = ValidationUtils.getValidatedString(scanner, "\nEnter Project ID to delete: ");
             Project project = projectService.findProjectById(projectId);
             if (project != null) {
@@ -250,13 +257,12 @@ private void deleteProject() {
                 }
             }
             menu.pause();
-        }
-        catch (SecurityException se) {
+        } catch (SecurityException se) {
             System.out.println("Permission Denied: " + se.getMessage());
         }
     }
 
-    private  void filterProjectsByStatus() {
+    private void filterProjectsByStatus() {
         System.out.println("Filter by status: 1.Active 2.Completed 3.On Hold");
         int choice = ValidationUtils.getValidatedChoice(scanner, "Enter choice (1-3): ", 1, 3);
         String status = switch (choice) {
@@ -279,7 +285,7 @@ private void deleteProject() {
         menu.pause();
     }
 
-    private  void filterProjectsByType() {
+    private void filterProjectsByType() {
         System.out.println("Filter by type: 1.Software Development 2.Hardware Development");
         int choice = ValidationUtils.getValidatedChoice(scanner, "Enter choice (1-2): ", 1, 2);
         String type = (choice == 1) ? "Software Development" : "Hardware Development";
@@ -298,18 +304,26 @@ private void deleteProject() {
         menu.pause();
     }
 
-    private  void handleTaskManagement() {
+    private void handleTaskManagement() {
         boolean inTaskMenu = true;
         while (inTaskMenu) {
             menu.displayTaskMenu();
             int choice = ValidationUtils.getValidatedChoice(scanner, "Enter your choice: ", 0, 8);
             try {
-
-
                 switch (choice) {
                     case 1 -> createNewTask();
                     case 2 -> {
-                        taskService.displayAllTasks();
+                        Task[] all = taskService.getAllTasks();
+                        if (all.length == 0) {
+                            System.out.println("No tasks available.");
+                        } else {
+                            System.out.println("TASK LIST");
+                            for (int i = 0; i < all.length; i++) {
+                                System.out.printf("\n[%d] ", i + 1);
+                                all[i].displayTaskInfo();
+                            }
+                            System.out.println("Total Tasks: " + all.length);
+                        }
                         menu.pause();
                     }
                     case 3 -> searchTask();
@@ -320,30 +334,30 @@ private void deleteProject() {
                     case 8 -> viewTasksByPriority();
                     case 0 -> inTaskMenu = false;
                 }
-            }catch (RuntimeException e){
+            } catch (RuntimeException e) {
                 showError(e);
             }
         }
     }
 
-private void createNewTask()  {
+    private void createNewTask() {
         try {
-            SessionManager.requirePermission("CREATE_TASKS");
+            sessionManager.requirePermission("CREATE_TASKS");
             System.out.println("\nCREATE NEW TASK");
             Task task = readTaskFromInput();
             if (task == null) {
-                // already notified user
                 return;
             }
             taskService.addTask(task);
             System.out.println("Task added successfully.");
             menu.pause();
-        }catch (SecurityException se) {
+        } catch (SecurityException se) {
             System.out.println("Permission Denied: " + se.getMessage());
         }
-}
-    private  Task readTaskFromInput() {
-    String projectId = ValidationUtils.getValidatedString(scanner, "Enter Project ID for the Task: ");
+    }
+
+    private Task readTaskFromInput() {
+        String projectId = ValidationUtils.getValidatedString(scanner, "Enter Project ID for the Task: ");
 
         if (projectService.findProjectById(projectId) == null) {
             System.out.println("Project not found. Task creation cancelled.");
@@ -360,8 +374,8 @@ private void createNewTask()  {
         return new Task(projectId, taskName, description, assignedTo, priority, dueDate);
     }
 
-  private void searchTask() {
-    Task task = findTaskOrNotify("\nEnter Task ID to search: ");
+    private void searchTask() {
+        Task task = findTaskOrNotify("\nEnter Task ID to search: ");
         if (task != null) {
             System.out.println("Task Found:");
             task.displayTaskInfo();
@@ -370,11 +384,11 @@ private void createNewTask()  {
         menu.pause();
     }
 
-private void updateTaskStatus() {
+    private void updateTaskStatus() {
 
-    Task task = findTaskOrNotify("\nEnter Task ID to update: ");
+        Task task = findTaskOrNotify("\nEnter Task ID to update: ");
 
-    if (task == null) {
+        if (task == null) {
 
             return;
         }
@@ -401,12 +415,9 @@ private void updateTaskStatus() {
         }
     }
 
-
-private void deleteTask(){
+    private void deleteTask() {
         try {
-
-
-            SessionManager.requirePermission("DELETE_TASKS");
+            sessionManager.requirePermission("DELETE_TASKS");
             String taskId = ValidationUtils.getValidatedString(scanner, "\nEnter Task ID to delete: ");
             Task task = taskService.findTaskById(taskId);
             if (task != null) {
@@ -418,22 +429,21 @@ private void deleteTask(){
                         taskService.deleteTask(taskId);
                         System.out.println("Task deleted successfully.");
 
-                    }catch (RuntimeException e){
+                    } catch (RuntimeException e) {
                         showError(e);
                     }
 
-                    } else {
+                } else {
                     System.out.println("Deletion cancelled.");
                 }
             }
             menu.pause();
-        }
-        catch (SecurityException se) {
+        } catch (SecurityException se) {
             System.out.println("Permission Denied: " + se.getMessage());
         }
     }
 
-    private  void viewTasksByProject() {
+    private void viewTasksByProject() {
         String projectId = ValidationUtils.getValidatedString(scanner, "\nEnter Project ID: ");
         Task[] tasks = taskService.getTasksByProjectId(projectId);
         System.out.println("Tasks for Project: " + projectId);
@@ -448,7 +458,7 @@ private void deleteTask(){
         menu.pause();
     }
 
-    private  void viewTasksByUser() {
+    private void viewTasksByUser() {
         String userId = ValidationUtils.getValidatedString(scanner, "\nEnter User ID: ");
         Task[] tasks = taskService.getTasksByUserId(userId);
         System.out.println("Tasks assigned to User: " + userId);
@@ -463,7 +473,7 @@ private void deleteTask(){
         menu.pause();
     }
 
-    private  void viewTasksByPriority() {
+    private void viewTasksByPriority() {
         System.out.println("Filter by priority: 1.High 2.Medium 3.Low");
         int choice = ValidationUtils.getValidatedChoice(scanner, "Enter choice (1-3): ", 1, 3);
         String priority = switch (choice) {
@@ -485,18 +495,18 @@ private void deleteTask(){
         menu.pause();
     }
 
-    private  void handleUserManagement() {
+    private void handleUserManagement() {
         System.out.println("USER MANAGEMENT");
         System.out.println("Current User Information:");
-        SessionManager.getCurrentUser().displayUserInfo();
+        sessionManager.getCurrentUser().displayUserInfo();
         System.out.println("User Permissions:");
-        for (String permission : SessionManager.getCurrentUser().getPermissions()) {
+        for (String permission : sessionManager.getCurrentUser().getPermissions()) {
             System.out.println(" - " + permission);
         }
         menu.pause();
     }
 
-    private  void handleReports() {
+    private void handleReports() {
         boolean inReportMenu = true;
         while (inReportMenu) {
             menu.displayReportMenu();
@@ -504,19 +514,36 @@ private void deleteTask(){
             try {
                 switch (choice) {
 
-                    case 1 -> { reportService.generateStatusReport(); menu.pause(); }
-                    case 2 -> { String projectId = ValidationUtils.getValidatedString(scanner, "\nEnter Project ID: "); reportService.generateProjectReport(projectId); menu.pause(); }
-                    case 3 -> { String userId = ValidationUtils.getValidatedString(scanner, "\nEnter User ID: "); reportService.generateUserWorkloadReport(userId); menu.pause(); }
-                    case 4 -> { generateCompletionSummary(); menu.pause(); }
+                    case 1 -> {
+                        String report = reportService.generateStatusReport();
+                        System.out.println(report);
+                        menu.pause();
+                    }
+                    case 2 -> {
+                        String projectId = ValidationUtils.getValidatedString(scanner, "\nEnter Project ID: ");
+                        String report = reportService.generateProjectReport(projectId);
+                        System.out.println(report);
+                        menu.pause();
+                    }
+                    case 3 -> {
+                        String userId = ValidationUtils.getValidatedString(scanner, "\nEnter User ID: ");
+                        String report = reportService.generateUserWorkloadReport(userId);
+                        System.out.println(report);
+                        menu.pause();
+                    }
+                    case 4 -> {
+                        generateCompletionSummary();
+                        menu.pause();
+                    }
                     case 0 -> inReportMenu = false;
                 }
-            } catch (RuntimeException e){
+            } catch (RuntimeException e) {
                 showError(e);
             }
         }
     }
 
-    private  void generateCompletionSummary() {
+    private void generateCompletionSummary() {
         Project[] projects = projectService.getAllProjects();
         System.out.println("PROJECT COMPLETION SUMMARY");
         if (projects.length == 0) {
@@ -538,26 +565,26 @@ private void deleteTask(){
         System.out.printf("Average Completion: %.2f%%%n", projectService.getAverageCompletion());
     }
 
-private Project findProjectOrNotify() {
-    String projectId = ValidationUtils.getValidatedString(scanner, "\nEnter Project ID to search: ");
-    Project project = projectService.findProjectById(projectId);
-    if (project == null) {
-        System.out.println("Project not found.");
+    private Project findProjectOrNotify() {
+        String projectId = ValidationUtils.getValidatedString(scanner, "\nEnter Project ID to search: ");
+        Project project = projectService.findProjectById(projectId);
+        if (project == null) {
+            System.out.println("Project not found.");
+        }
+        return project;
     }
-    return project;
-}
 
-private Task findTaskOrNotify(String prompt) {
-    String taskId = ValidationUtils.getValidatedString(scanner, prompt);
-    Task task = taskService.findTaskById(taskId);
-    if (task == null) {
-        System.out.println("Task not found.");
+    private Task findTaskOrNotify(String prompt) {
+        String taskId = ValidationUtils.getValidatedString(scanner, prompt);
+        Task task = taskService.findTaskById(taskId);
+        if (task == null) {
+            System.out.println("Task not found.");
+        }
+        return task;
     }
-    return task;
-}
 
 
-    private  void showError(RuntimeException e){
+    private void showError(RuntimeException e) {
         System.out.println("Error: " + e.getMessage());
         menu.pause();
     }

@@ -66,6 +66,39 @@ public abstract class Project {
         System.out.println(getProjectDetails());
     }
 
+    /**
+     * Returns a formatted, non-interactive representation of the project suitable
+     * for inclusion in programmatic reports. This mirrors the output of
+     * displayProjectInfo() but returns the result as a String so callers (like
+     * ReportService) can decide how to present it.
+     */
+    public String getDisplayString() {
+        return String.format(
+            "Project ID   : %s%n" +
+            "Name         : %s%n" +
+            "Type         : %s%n" +
+            "Description  : %s%n" +
+            "Start Date   : %s%n" +
+            "End Date     : %s%n" +
+            "Team Size    : %d%n" +
+            "Budget       : $%.2f%n" +
+            "Status       : %s%n" +
+            "Completion   : %.2f%%%n" +
+            "%s",
+            getProjectId(),
+            getProjectName(),
+            getProjectType(),
+            getDescription(),
+            getStartDate(),
+            getEndDate(),
+            getTeamSize(),
+            getBudget(),
+            getStatus(),
+            calculateCompletionPercentage(),
+            getProjectDetails()
+        );
+    }
+
     @Override
     public String toString() {
         return String.format("Project[ID=%s, Name=%s, Type=%s, Status=%s, Completion=%.2f%%]",
@@ -101,3 +134,4 @@ public abstract class Project {
 
     public int getTaskCount() { return taskCount; }
 }
+

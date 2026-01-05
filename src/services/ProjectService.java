@@ -118,17 +118,12 @@ public class ProjectService {
         return result;
     }
 
+    /**
+     * Deprecated: presentation should be handled by the UI layer. Use getAllProjects() instead.
+     */
+    @Deprecated
     public void displayAllProjects() {
-        if (projectCount == 0) {
-            System.out.println("No projects available.");
-            return;
-        }
-        System.out.println("PROJECT CATALOG");
-        for (int i = 0; i < projectCount; i++) {
-            System.out.printf("\n[%d] ", i + 1);
-            projects[i].displayProjectInfo();
-        }
-        System.out.println("Total Projects: " + projectCount);
+        throw new UnsupportedOperationException("Use getAllProjects() and present data in the UI layer.");
     }
 
     public int getProjectCount() { return projectCount; }

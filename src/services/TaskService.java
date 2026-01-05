@@ -52,7 +52,7 @@ public class TaskService {
         }
         tasks[taskCount++] = task;
         project.addTask(task);
-        System.out.println("Task added successfully.");
+        // UI layer should inform the user; removed duplicate console output from service
 
 
     }
@@ -67,7 +67,7 @@ public class TaskService {
             if (tasks[i].getTaskId().equals(taskId)) {
                 validateTaskData(updatedTask);
                 tasks[i] = updatedTask;
-                System.out.println("Task updated successfully.");
+                // UI layer will handle user-facing messages; removed console output
                 return;
             }
         }
@@ -137,17 +137,12 @@ public class TaskService {
         return result;
     }
 
+    /**
+     * Deprecated: presentation should be handled by the UI layer. Use getAllTasks() instead.
+     */
+    @Deprecated
     public void displayAllTasks() {
-        if (taskCount == 0) {
-            throw new TaskNotFoundException("No tasks available to display.");
-
-        }
-        System.out.println("TASK LIST");
-        for (int i = 0; i < taskCount; i++) {
-            System.out.printf("\n[%d] ", i + 1);
-            tasks[i].displayTaskInfo();
-        }
-        System.out.println("Total Tasks: " + taskCount);
+        throw new UnsupportedOperationException("Use getAllTasks() and present data in the UI layer.");
     }
 
     public int getTaskCount() { return taskCount; }
@@ -173,3 +168,4 @@ public class TaskService {
         ValidationUtils.requireValidStatus(task.getStatus());
     }
 }
+
