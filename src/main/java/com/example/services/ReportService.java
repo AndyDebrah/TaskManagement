@@ -1,8 +1,8 @@
-package services;
-import exceptions.EmptyProjectException;
+package main.java.com.example.services;
+import main.java.com.example.exceptions.EmptyProjectException;
 
-import models.Project;
-import models.Task;
+import main.java.com.example.models.Project;
+import main.java.com.example.models.Task;
 
 /** Service class for generating reports. */
 public class ReportService {

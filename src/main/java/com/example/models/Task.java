@@ -1,10 +1,10 @@
-package models;
+package main.java.com.example.models;
 
-import interfaces.Completable;
+import main.java.com.example.interfaces.Completable;
 
 /** Task model representing individual tasks within projects. */
 public class Task implements Completable {
-    private static int taskCounter = 1;
+    private static int taskCounter = 4;
     private final String projectId;
     private final String taskName;
     private final String description;

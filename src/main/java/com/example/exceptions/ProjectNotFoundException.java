@@ -1,4 +1,4 @@
-package exceptions;
+package main.java.com.example.exceptions;
 
 public class ProjectNotFoundException extends RuntimeException {
 

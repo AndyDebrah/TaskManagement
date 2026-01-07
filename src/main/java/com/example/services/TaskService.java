@@ -1,23 +1,32 @@
-package services;
+package main.java.com.example.services;
 
-import models.Task;
-import exceptions.TaskNotFoundException;
-import exceptions.ProjectNotFoundException;
-import exceptions.InvalidInputException;
-import utils.ValidationUtils;
+import main.java.com.example.models.Project;
+import main.java.com.example.models.Task;
+import main.java.com.example.exceptions.TaskNotFoundException;
+import main.java.com.example.exceptions.ProjectNotFoundException;
+import main.java.com.example.exceptions.InvalidInputException;
+import main.java.com.example.utils.ValidationUtils;
 
 /** Service class for managing task operations. */
 public class TaskService {
     private final Task[] tasks;
     private int taskCount;
     private static final int MAX_TASKS = 500;
+    private static int taskCounter = 4;
+
+
 
     private ProjectService projectService;
+
+    private static String generateTaskId() {
+        return String.format("TSK%04d", taskCounter++);
+    }
 
     public TaskService() {
         this.tasks = new Task[MAX_TASKS];
         this.taskCount = 0;
         this.projectService = null;
+
     }
 
     public TaskService(Task[] tasks) {
@@ -46,7 +55,7 @@ public class TaskService {
         if(projectService==null){
             throw new ProjectNotFoundException(task.getProjectId());
         }
-        models.Project project = projectService.findProjectById(task.getProjectId());
+        Project project = projectService.findProjectById(task.getProjectId());
         if (project == null) {
             throw new ProjectNotFoundException(task.getProjectId());
         }
@@ -82,7 +91,7 @@ public class TaskService {
                 tasks[taskCount - 1] = null;
                 taskCount--;
                 if (projectService != null) {
-                    models.Project project = projectService.findProjectById(projectId);
+                    Project project = projectService.findProjectById(projectId);
                     if (project != null) project.removeTask(taskId);
                 }
                 else{
@@ -164,7 +173,7 @@ public class TaskService {
         ValidationUtils.requireNonEmpty(task.getDescription(), "Description");
         ValidationUtils.requireNonEmpty(task.getAssignedTo(), "Assigned User");
         ValidationUtils.requireValidPriority(task.getPriority());
-        ValidationUtils.requireNonEmpty(task.getDueDate(), "Due Date");
+//        ValidationUtils.requireNonEmpty(task.getDueDate(), "Due Date");
         ValidationUtils.requireValidStatus(task.getStatus());
     }
 }

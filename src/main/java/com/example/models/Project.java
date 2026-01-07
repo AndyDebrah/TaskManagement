@@ -1,4 +1,4 @@
-package models;
+package main.java.com.example.models;
 
 /** Common abstract project class. */
 public abstract class Project {

@@ -1,4 +1,4 @@
-package models;
+package main.java.com.example.models;
 
 /** Software development project implementation. */
 public class SoftwareProject extends Project {

@@ -1,5 +1,5 @@
-package utils;
-import models.User;
+package main.java.com.example.utils;
+import main.java.com.example.models.User;
 
 public class SessionManager {
 

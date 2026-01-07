@@ -1,9 +1,9 @@
-package models;
+package main.java.com.example.models;
 
 /** Regular user with standard permissions. */
 public class RegularUser extends User {
-    private int tasksAssigned;
-    private int tasksCompleted;
+    private final int tasksAssigned;
+    private final int tasksCompleted;
 
     public RegularUser(String userId, String userName, String email, String password) {
         super(userId, userName, email, password);
@@ -12,13 +12,13 @@ public class RegularUser extends User {
         this.tasksCompleted = 0;
     }
 
-    public int getTasksAssigned() { return tasksAssigned; }
-    public void setTasksAssigned(int tasksAssigned) { this.tasksAssigned = tasksAssigned; }
-    public int getTasksCompleted() { return tasksCompleted; }
-    public void setTasksCompleted(int tasksCompleted) { this.tasksCompleted = tasksCompleted; }
-
-    public void assignTask() { tasksAssigned++; }
-    public void completeTask() { tasksCompleted++; }
+//    public int getTasksAssigned() { return tasksAssigned; }
+//    public void setTasksAssigned(int tasksAssigned) { this.tasksAssigned = tasksAssigned; }
+//    public int getTasksCompleted() { return tasksCompleted; }
+//    public void setTasksCompleted(int tasksCompleted) { this.tasksCompleted = tasksCompleted; }
+//
+//    public void assignTask() { tasksAssigned++; }
+//    public void completeTask() { tasksCompleted++; }
 
     public double getProductivityRate() {
         if (tasksAssigned == 0) return 0.0;

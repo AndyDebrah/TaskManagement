@@ -1,10 +1,10 @@
-package services;
+package main.java.com.example.services;
 
 
-import models.Project;
-import exceptions.InvalidProjectDataException;
-import exceptions.ProjectNotFoundException;
-import utils.ValidationUtils;
+import main.java.com.example.models.Project;
+import main.java.com.example.exceptions.InvalidProjectDataException;
+import main.java.com.example.exceptions.ProjectNotFoundException;
+import main.java.com.example.utils.ValidationUtils;
 
 
 

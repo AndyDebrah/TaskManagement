@@ -1,5 +1,5 @@
-package utils;
-import exceptions.InvalidInputException;
+package main.java.com.example.utils;
+import main.java.com.example.exceptions.InvalidInputException;
 
 
 import java.util.Scanner;
