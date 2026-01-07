@@ -1,10 +1,15 @@
-import models.*;
-import services.ProjectService;
-import services.ReportService;
-import services.TaskService;
-import utils.ConsoleMenu;
-import utils.SessionManager;
-import utils.ValidationUtils;
+package main.java.com.example;
+
+import main.java.com.example.models.*;
+import main.java.com.example.services.ProjectService;
+import main.java.com.example.services.ReportService;
+import main.java.com.example.services.TaskService;
+import main.java.com.example.utils.ConsoleMenu;
+import main.java.com.example.utils.SessionManager;
+import main.java.com.example.utils.ValidationUtils;
+import main.java.com.example.models.HardwareProject;
+import main.java.com.example.services.HardwareProjectManager;
+
 
 import java.util.Scanner;
 
@@ -46,6 +51,14 @@ public class ConsoleApp {
         sessionManager.getCurrentUser().displayUserInfo();
         menu.pause();
     }
+    HardwareProject project = new HardwareProject(
+            "Smart Sensor", "IoT Hardware Project",
+            "2026-01-01", "2026-03-31",
+            5000.0, 5,
+            "Sensor", 10
+    );
+    HardwareProjectManager manager = new HardwareProjectManager(project);
+
 
     private void switchUser() {
         System.out.println("\nSWITCH USER");

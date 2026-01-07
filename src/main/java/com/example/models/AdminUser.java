@@ -1,9 +1,9 @@
-package models;
+package main.java.com.example.models;
 
 /** Administrator user with full system permissions. */
 public class AdminUser extends User {
-    private int projectsCreated;
-    private int usersManaged;
+    private final int projectsCreated;
+    private final int usersManaged;
 
     public AdminUser(String userId, String userName, String email, String password) {
         super(userId, userName, email, password);
@@ -12,10 +12,10 @@ public class AdminUser extends User {
         this.usersManaged = 0;
     }
 
-    public int getProjectsCreated() { return projectsCreated; }
-    public void incrementProjectsCreated() { this.projectsCreated++; }
-    public int getUsersManaged() { return usersManaged; }
-    public void setUsersManaged(int usersManaged) { this.usersManaged = usersManaged; }
+//    public int getProjectsCreated() { return projectsCreated; }
+//    public void incrementProjectsCreated() { this.projectsCreated++; }
+//    public int getUsersManaged() { return usersManaged; }
+//    public void setUsersManaged(int usersManaged) { this.usersManaged = usersManaged; }
 
     @Override
     public String[] getPermissions() {
