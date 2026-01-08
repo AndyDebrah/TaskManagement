@@ -1,14 +1,11 @@
 package main.java.com.example;
 
 import main.java.com.example.models.*;
-import main.java.com.example.services.ProjectService;
-import main.java.com.example.services.ReportService;
-import main.java.com.example.services.TaskService;
+import main.java.com.example.services.*;
 import main.java.com.example.utils.ConsoleMenu;
 import main.java.com.example.utils.SessionManager;
 import main.java.com.example.utils.ValidationUtils;
 import main.java.com.example.models.HardwareProject;
-import main.java.com.example.services.HardwareProjectManager;
 
 
 import java.util.Scanner;
@@ -57,7 +54,7 @@ public class ConsoleApp {
             5000.0, 5,
             "Sensor", 10
     );
-    HardwareProjectManager manager = new HardwareProjectManager(project);
+
 
 
     private void switchUser() {

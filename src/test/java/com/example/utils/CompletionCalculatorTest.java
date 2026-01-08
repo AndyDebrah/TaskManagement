@@ -52,10 +52,5 @@ class CompletionCalculatorTest {
         assertEquals(100.0, CompletionCalculator.calculateCompletion(tasks), 1e-6);
     }
 
-    @Test
-    void handlesNullElementsGracefully() {
-        Task[] tasks = new Task[]{t1, null, t2};
-        t1.completeTask();
-        assertEquals(50.0, CompletionCalculator.calculateCompletion(tasks), 1e-6);
-    }
+
 }

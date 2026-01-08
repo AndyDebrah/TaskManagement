@@ -173,7 +173,7 @@ public class TaskService {
         ValidationUtils.requireNonEmpty(task.getDescription(), "Description");
         ValidationUtils.requireNonEmpty(task.getAssignedTo(), "Assigned User");
         ValidationUtils.requireValidPriority(task.getPriority());
-//        ValidationUtils.requireNonEmpty(task.getDueDate(), "Due Date");
+        ValidationUtils.requireNonEmpty(task.getDueDate(), "Due Date");
         ValidationUtils.requireValidStatus(task.getStatus());
     }
 }
