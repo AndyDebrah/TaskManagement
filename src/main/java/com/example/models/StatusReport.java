@@ -8,10 +8,10 @@ import main.java.com.example.services.TaskService;
  * Demonstrates separation of reporting logic
  */
 public class StatusReport {
-    private String reportId;
-    private String reportDate;
-    private ProjectService projectService;
-    private TaskService taskService;
+    private final String reportId;
+    private final String reportDate;
+    private final ProjectService projectService;
+    private final TaskService taskService;
 
     public StatusReport(String reportId, String reportDate,
                         ProjectService projectService, TaskService taskService) {

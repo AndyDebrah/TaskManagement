@@ -10,7 +10,8 @@ import main.java.com.example.utils.SessionManager;
 import java.util.Scanner;
 
 public class Main {
-    public static void main(String[] args) {
+
+    static void main(String[] args) {
         final ProjectService projectService = new ProjectService(Seed.seedProjects());
         final TaskService taskService = new TaskService(Seed.seedTasks(), projectService);
         final ReportService reportService = new ReportService(projectService, taskService);

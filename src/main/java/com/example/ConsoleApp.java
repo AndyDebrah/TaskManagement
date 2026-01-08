@@ -232,12 +232,14 @@ public class ConsoleApp {
             System.out.println("What would you like to update? 1.Name  2.Description  3.Status  4.End Date");
             int choice = ValidationUtils.getValidatedChoice(scanner, "Enter choice (1-4): ", 1, 4);
 
+
             switch (choice) {
                 case 1 -> project.setProjectName(ValidationUtils.getValidatedTextField(scanner, "Enter new name: ", "Project Name"));
                 case 2 -> project.setDescription(ValidationUtils.getValidatedTextField(scanner, "Enter new description: ", "Description"));
                 case 3 -> project.setStatus(ValidationUtils.getValidatedString(scanner, "Enter new status: "));
                 case 4 -> project.setEndDate(ValidationUtils.getValidatedDate(scanner, "Enter new end date (YYYY-MM-DD): "));
             }
+
             try {
                 projectService.updateProject(projectId, project);
                 System.out.println("Project updated successfully.");
