@@ -23,13 +23,13 @@ class CompletionCalculatorTest {
     }
 
     @Test
-    void whenNoTasks_returnsZero() {
+    void whenNoTasksReturnsZero() {
         assertEquals(0.0, CompletionCalculator.calculateCompletion(new Task[0]), 1e-6);
         assertEquals(0.0, CompletionCalculator.calculateCompletion((List<Task>) null), 1e-6);
     }
 
     @Test
-    void whenPartialCompletion_returnsCorrectPercent() {
+    void whenPartialCompletionReturnsCorrectPercent() {
         t1.completeTask();
         t2.completeTask();
         Task[] tasks = new Task[]{t1, t2, t3, t4};
@@ -44,7 +44,7 @@ class CompletionCalculatorTest {
     }
 
     @Test
-    void whenAllCompleted_returnsHundred() {
+    void whenAllCompletedReturnsHundred() {
         t1.completeTask();
         t2.completeTask();
         t3.completeTask();

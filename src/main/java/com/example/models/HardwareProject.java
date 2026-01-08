@@ -1,5 +1,6 @@
 package main.java.com.example.models;
 
+
 /** Hardware development project implementation. */
    public class HardwareProject extends Project {
     private final String hardwareType;
