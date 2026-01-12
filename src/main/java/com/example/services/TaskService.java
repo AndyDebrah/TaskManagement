@@ -1,3 +1,4 @@
+
 package main.java.com.example.services;
 
 import main.java.com.example.models.Project;
@@ -7,33 +8,37 @@ import main.java.com.example.exceptions.ProjectNotFoundException;
 import main.java.com.example.exceptions.InvalidInputException;
 import main.java.com.example.utils.ValidationUtils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /** Service class for managing task operations. */
 public class TaskService {
-    private final Task[] tasks;
-    private int taskCount;
+    // Phase 1: replace array storage with a map (fast ID lookup)
+    private final Map<String, Task> tasksById = new HashMap<>();
     private static final int MAX_TASKS = 500;
     private static int taskCounter = 4;
 
-
-
     private ProjectService projectService;
 
+    @SuppressWarnings("unused")
     private static String generateTaskId() {
         return String.format("TSK%04d", taskCounter++);
     }
 
     public TaskService() {
-        this.tasks = new Task[MAX_TASKS];
-        this.taskCount = 0;
         this.projectService = null;
-
     }
 
     public TaskService(Task[] tasks) {
         this();
-        for (Task task : tasks) {
-            if (task != null) {
-                this.tasks[taskCount++] = task;
+        if (tasks != null) {
+            for (Task task : tasks) {
+                if (task != null) {
+                    if (tasksById.size() >= MAX_TASKS) {
+                        throw new InvalidInputException("Error: Maximum task limit reached!");
+                    }
+                    tasksById.put(task.getTaskId(), task);
+                }
             }
         }
     }
@@ -43,138 +48,174 @@ public class TaskService {
         this.projectService = projectService;
     }
 
-
-    public void addTask(Task task) {
-        if (taskCount >= MAX_TASKS) {
+    public synchronized void addTask(Task task) {
+        if (tasksById.size() >= MAX_TASKS) {
             throw new InvalidInputException("Error: Maximum task limit reached!");
         }
-        if (findTaskById(task.getTaskId()) != null) {
-           throw new InvalidInputException("Error: Task ID already exists!");
+        if (task == null) {
+            throw new InvalidInputException("Task must not be null.");
         }
+        if (tasksById.containsKey(task.getTaskId())) {
+            throw new InvalidInputException("Error: Task ID already exists!");
+        }
+
+        ValidationUtils.requireValidTaskId(task.getTaskId());
         validateTaskData(task);
-        if(projectService==null){
+
+        if (projectService == null) {
             throw new ProjectNotFoundException(task.getProjectId());
         }
         Project project = projectService.findProjectById(task.getProjectId());
         if (project == null) {
             throw new ProjectNotFoundException(task.getProjectId());
         }
-        tasks[taskCount++] = task;
+
+        tasksById.put(task.getTaskId(), task);
         project.addTask(task);
-        // UI layer should inform the user; removed duplicate console output from service
-
-
     }
 
     public Task findTaskById(String taskId) {
-        for (int i = 0; i < taskCount; i++) if (tasks[i].getTaskId().equals(taskId)) return tasks[i];
-        return null;
+        return tasksById.get(taskId);
     }
 
-    public void updateTask(String taskId, Task updatedTask) {
-        for (int i = 0; i < taskCount; i++) {
-            if (tasks[i].getTaskId().equals(taskId)) {
-                validateTaskData(updatedTask);
-                tasks[i] = updatedTask;
-                // UI layer will handle user-facing messages; removed console output
-                return;
-            }
+    public synchronized void updateTask(String taskId, Task updatedTask) {
+        Task existing = tasksById.get(taskId);
+        if (existing == null) {
+            throw new TaskNotFoundException(taskId);
         }
-        throw new TaskNotFoundException(taskId);
-    }
 
-    public void deleteTask(String taskId) {
-        for (int i = 0; i < taskCount; i++) {
-            if (tasks[i].getTaskId().equals(taskId)) {
-                String projectId = tasks[i].getProjectId();
-                for (int j = i; j < taskCount - 1; j++) tasks[j] = tasks[j + 1];
-                tasks[taskCount - 1] = null;
-                taskCount--;
-                if (projectService != null) {
-                    Project project = projectService.findProjectById(projectId);
-                    if (project != null) project.removeTask(taskId);
-                }
-                else{
-                    throw new ProjectNotFoundException(projectId);
-                }
 
-                return;
-            }
+        ValidationUtils.requireNonEmpty(updatedTask.getTaskId(), "Task ID");
+        ValidationUtils.requireNonEmpty(updatedTask.getProjectId(), "Project ID");
+        ValidationUtils.requireNonEmpty(updatedTask.getTaskName(), "Task Name");
+        ValidationUtils.requireNonEmpty(updatedTask.getDescription(), "Description");
+        ValidationUtils.requireNonEmpty(updatedTask.getAssignedTo(), "Assigned User");
+        ValidationUtils.requireValidPriority(updatedTask.getPriority());
+        ValidationUtils.requireNonEmpty(updatedTask.getDueDate(), "Due Date");
+        ValidationUtils.requireValidStatus(updatedTask.getStatus());
+
+
+        if (existing.getProjectId().equals(updatedTask.getProjectId())) {
+            existing.setStatus(updatedTask.getStatus());
+            tasksById.put(taskId, existing);
+            return;
         }
-       throw new TaskNotFoundException(taskId);
+
+        if (projectService == null) {
+            throw new ProjectNotFoundException(updatedTask.getProjectId());
+        }
+
+        Project oldProject = projectService.findProjectById(existing.getProjectId());
+        Project newProject = projectService.findProjectById(updatedTask.getProjectId());
+
+        if (newProject == null) {
+            // Do NOT break → just update status and stay in old project
+            existing.setStatus(updatedTask.getStatus());
+            tasksById.put(taskId, existing);
+
+            System.out.printf(
+                    "⚠ Warning: Cannot reassign task %s → project %s does not exist. Status updated only.%n",
+                    taskId, updatedTask.getProjectId()
+            );
+
+            return;
+        }
+
+        if (oldProject != null) oldProject.removeTask(taskId);
+        newProject.addTask(existing);
+
+        existing.setStatus(updatedTask.getStatus());
+        tasksById.put(taskId, existing);
+
     }
+
+
+
+
+
+
+    public synchronized void deleteTask(String taskId) {
+        Task removed = tasksById.remove(taskId);
+        if (removed == null) {
+            throw new TaskNotFoundException(taskId);
+        }
+        if (projectService == null) {
+            throw new ProjectNotFoundException(removed.getProjectId());
+        }
+        Project project = projectService.findProjectById(removed.getProjectId());
+        if (project != null) {
+            project.removeTask(taskId);
+        } else {
+            throw new ProjectNotFoundException(removed.getProjectId());
+        }
+    }
+
+    // -------- Backwards-compatible return types (arrays) --------
 
     public Task[] getAllTasks() {
-        Task[] result = new Task[taskCount];
-        System.arraycopy(tasks, 0, result, 0, taskCount);
-        return result;
+        return tasksById.values().toArray(new Task[0]);
     }
 
     public Task[] getTasksByProjectId(String projectId) {
-        int count = 0;
-        for (int i = 0; i < taskCount; i++) if (tasks[i].getProjectId().equals(projectId)) count++;
-        Task[] result = new Task[count];
-        int index = 0;
-        for (int i = 0; i < taskCount; i++) if (tasks[i].getProjectId().equals(projectId)) result[index++] = tasks[i];
-        return result;
+        return tasksById.values().stream()
+                .filter(t -> t.getProjectId().equals(projectId))
+                .toArray(Task[]::new);
     }
 
     public Task[] getTasksByUserId(String userId) {
-        int count = 0;
-        for (int i = 0; i < taskCount; i++) if (tasks[i].getAssignedTo().equals(userId)) count++;
-        Task[] result = new Task[count];
-        int index = 0;
-        for (int i = 0; i < taskCount; i++) if (tasks[i].getAssignedTo().equals(userId)) result[index++] = tasks[i];
-        return result;
+        return tasksById.values().stream()
+                .filter(t -> t.getAssignedTo().equals(userId))
+                .toArray(Task[]::new);
     }
 
     public Task[] getTasksByStatus(String status) {
-        int count = 0;
-        for (int i = 0; i < taskCount; i++) if (tasks[i].getStatus().equalsIgnoreCase(status)) count++;
-        Task[] result = new Task[count];
-        int index = 0;
-        for (int i = 0; i < taskCount; i++) if (tasks[i].getStatus().equalsIgnoreCase(status)) result[index++] = tasks[i];
-        return result;
+        return tasksById.values().stream()
+                .filter(t -> t.getStatus().equalsIgnoreCase(status))
+                .toArray(Task[]::new);
     }
 
     public Task[] getTasksByPriority(String priority) {
-        int count = 0;
-        for (int i = 0; i < taskCount; i++) if (tasks[i].getPriority().equalsIgnoreCase(priority)) count++;
-        Task[] result = new Task[count];
-        int index = 0;
-        for (int i = 0; i < taskCount; i++) if (tasks[i].getPriority().equalsIgnoreCase(priority)) result[index++] = tasks[i];
-        return result;
+        return tasksById.values().stream()
+                .filter(t -> t.getPriority().equalsIgnoreCase(priority))
+                .toArray(Task[]::new);
     }
 
-    /**
-     * Deprecated: presentation should be handled by the UI layer. Use getAllTasks() instead.
-     */
-    @Deprecated
-    public void displayAllTasks() {
-        throw new UnsupportedOperationException("Use getAllTasks() and present data in the UI layer.");
+    public int getTaskCount() {
+        return tasksById.size();
     }
-
-    public int getTaskCount() { return taskCount; }
 
     public double calculateProjectTaskCompletion(String projectId) {
-        Task[] projectTasks = getTasksByProjectId(projectId);
-        if (projectTasks.length == 0) return 0.0;
-        int completedCount = 0;
-        for (Task task : projectTasks) if (task.isCompleted()) completedCount++;
-        return (completedCount * 100.0) / projectTasks.length;
+        long total = tasksById.values().stream()
+                .filter(t -> t.getProjectId().equals(projectId))
+                .count();
+        if (total == 0) return 0.0;
+
+        long completed = tasksById.values().stream()
+                .filter(t -> t.getProjectId().equals(projectId))
+                .filter(Task::isCompleted)
+                .count();
+
+        return (completed * 100.0) / total;
     }
+
     private void validateTaskData(Task task) {
         if (task == null) {
             throw new InvalidInputException("Task must not be null.");
         }
         ValidationUtils.requireNonEmpty(task.getTaskId(), "Task ID");
-        ValidationUtils.requireNonEmpty(task.getProjectId(), "Project ID");
+        ValidationUtils.requireValidProjectId(task.getProjectId());
         ValidationUtils.requireNonEmpty(task.getTaskName(), "Task Name");
         ValidationUtils.requireNonEmpty(task.getDescription(), "Description");
         ValidationUtils.requireNonEmpty(task.getAssignedTo(), "Assigned User");
         ValidationUtils.requireValidPriority(task.getPriority());
         ValidationUtils.requireNonEmpty(task.getDueDate(), "Due Date");
         ValidationUtils.requireValidStatus(task.getStatus());
+
+
+
+
     }
+
+
 }
 

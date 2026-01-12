@@ -1,74 +1,69 @@
-package main.java.com.example.services;
 
+package main.java.com.example.services;
 
 import main.java.com.example.models.Project;
 import main.java.com.example.exceptions.InvalidProjectDataException;
 import main.java.com.example.exceptions.ProjectNotFoundException;
 import main.java.com.example.utils.ValidationUtils;
 
-
-
-
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /** Service class for managing project operations (in-memory). */
 public class ProjectService {
-    private final Project[] projects;
-    private int projectCount;
+    // Phase 1: replace array storage with HashMap catalog
+    private final Map<String, Project> projects = new HashMap<>();
     private static final int MAX_PROJECTS = 100;
 
     public ProjectService(Project[] seededProjects) {
-        this.projects = new Project[MAX_PROJECTS];
-        this.projectCount = 0;
-        for (Project project : seededProjects) {
-            if (project != null) {
-                this.projects[projectCount++] = project;
+        if (seededProjects != null) {
+            for (Project project : seededProjects) {
+                if (project != null) {
+                    if (projects.size() >= MAX_PROJECTS) {
+                        throw new InvalidProjectDataException("Error: Maximum project limit reached!");
+                    }
+                    projects.put(project.getProjectId(), project);
+                }
             }
         }
     }
 
-    public void addProject(Project project) {
-        if (projectCount >= MAX_PROJECTS) {
+    public synchronized void addProject(Project project) {
+        if (projects.size() >= MAX_PROJECTS) {
             throw new InvalidProjectDataException("Error: Maximum project limit reached!");
         }
-        if (findProjectById(project.getProjectId()) != null) {
-            throw new InvalidProjectDataException("Error: Project ID already exists!");
-
+        if (project == null) {
+            throw new InvalidProjectDataException("Error: Project data cannot be null!");
         }
+        if (projects.containsKey(project.getProjectId())) {
+            throw new InvalidProjectDataException("Error: Project ID already exists!");
+        }
+        ValidationUtils.requireValidProjectId(project.getProjectId());
         validateProjectData(project);
-        projects[projectCount++] = project;
+        projects.put(project.getProjectId(), project);
     }
 
     public Project findProjectById(String projectId) {
-        for (int i = 0; i < projectCount; i++) {
-            if (projects[i].getProjectId().equals(projectId)) return projects[i];
-        }
-        return null;
+        return projects.get(projectId);
     }
 
-
-    public void updateProject(String projectId, Project updatedProject) {
-        for (int i = 0; i < projectCount; i++) {
-            if (projects[i].getProjectId().equals(projectId)) {
-                validateProjectData(updatedProject);
-                projects[i] = updatedProject;
-
-                return;
-            }
+    public synchronized void updateProject(String projectId, Project updatedProject) {
+        if (!projects.containsKey(projectId)) {
+            throw new ProjectNotFoundException(projectId);
         }
-       throw new ProjectNotFoundException(projectId);
+
+
+        ValidationUtils.requireValidProjectId(updatedProject.getProjectId());
+        validateProjectData(updatedProject);
+        projects.put(projectId, updatedProject);
     }
 
-    public void deleteProject(String projectId) {
-        for (int i = 0; i < projectCount; i++) {
-            if (projects[i].getProjectId().equals(projectId)) {
-                for (int j = i; j < projectCount - 1; j++) projects[j] = projects[j + 1];
-                projects[projectCount - 1] = null;
-                projectCount--;
-                return;
-            }
+    public synchronized void deleteProject(String projectId) {
+        if (projects.remove(projectId) == null) {
+            throw new ProjectNotFoundException(projectId);
         }
-       throw new ProjectNotFoundException(projectId);
     }
 
     private void validateProjectData(Project project){
@@ -79,37 +74,40 @@ public class ProjectService {
         ValidationUtils.requireNonEmpty(project.getProjectName(), "Project Name");
         ValidationUtils.requireNonEmpty(project.getStatus(), "Project Status");
         ValidationUtils.requireNonEmpty(project.getDescription(), "Description");
-        if(project.getTeamSize() <=0){
+        if(project.getTeamSize() <= 0){
             throw new InvalidProjectDataException("Error: Team size must be positive!");
-
         }
-        if (project.getBudget() <=0){
+        if (project.getBudget() <= 0){
             throw new InvalidProjectDataException("Error: Budget cannot be negative!");
         }
     }
 
+    // -------- Backwards-compatible return types (arrays) --------
+
     public Project[] getAllProjects() {
-        Project[] result = new Project[projectCount];
-        System.arraycopy(projects, 0, result, 0, projectCount);
-        return result;
+        List<Project> list = new ArrayList<>(projects.values());
+        return list.toArray(new Project[0]);
     }
 
     public Project[] getProjectsByStatus(String status) {
-        int count = 0;
-        for (int i = 0; i < projectCount; i++) if (projects[i].getStatus().equalsIgnoreCase(status)) count++;
-        Project[] result = new Project[count];
-        int index = 0;
-        for (int i = 0; i < projectCount; i++) if (projects[i].getStatus().equalsIgnoreCase(status)) result[index++] = projects[i];
-        return result;
+        return projects.values().stream()
+                .filter(p -> p.getStatus().equalsIgnoreCase(status))
+                .toArray(Project[]::new);
     }
 
     public Project[] getProjectsByType(String type) {
-        int count = 0;
-        for (int i = 0; i < projectCount; i++) if (projects[i].getProjectType().equalsIgnoreCase(type)) count++;
-        Project[] result = new Project[count];
-        int index = 0;
-        for (int i = 0; i < projectCount; i++) if (projects[i].getProjectType().equalsIgnoreCase(type)) result[index++] = projects[i];
-        return result;
+        return projects.values().stream()
+                .filter(p -> p.getProjectType().equalsIgnoreCase(type))
+                .toArray(Project[]::new);
+    }
+
+    public int getProjectCount() { return projects.size(); }
+
+    public double getAverageCompletion() {
+        return projects.values().stream()
+                .mapToDouble(Project::calculateCompletionPercentage)
+                .average()
+                .orElse(0.0);
     }
 
     /**
@@ -118,14 +116,5 @@ public class ProjectService {
     @Deprecated
     public void displayAllProjects() {
         throw new UnsupportedOperationException("Use getAllProjects() and present data in the UI layer.");
-    }
-
-    public int getProjectCount() { return projectCount; }
-
-    public double getAverageCompletion() {
-        if (projectCount == 0) return 0.0;
-        double total = 0.0;
-        for (int i = 0; i < projectCount; i++) total += projects[i].calculateCompletionPercentage();
-        return total / projectCount;
     }
 }

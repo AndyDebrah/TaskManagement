@@ -59,6 +59,7 @@ public class ConsoleMenu {
         System.out.println("6.  View Tasks by Project");
         System.out.println("7.  View Tasks by User");
         System.out.println("8.  View Tasks by Priority");
+        System.out.println("9. Simulate Concurrent Task Updates");
         System.out.println("0.  Back to Main Menu");
         System.out.println("--------------------------------------------------------------");
     }
@@ -96,6 +97,21 @@ public class ConsoleMenu {
         System.out.println("Thank you for using Project Management System. Goodbye!");
         System.out.println("======================================================================\n");
     }
+
+
+
+    // In ConsoleMenu.java (add this method)
+    public int[] promptConcurrencyParams() {
+        System.out.println();
+        System.out.println("=== Concurrent Updates Parameters ===");
+        int workers = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter number of workers (e.g., 4): ");
+        int opsPerWorker = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter operations per worker (e.g., 50): ");
+        System.out.printf("→ Running with %d worker(s), %d op(s) each.%n", workers, opsPerWorker);
+        return new int[]{workers, opsPerWorker};
+    }
+
+
+
 
     public void pause() {
         System.out.println();

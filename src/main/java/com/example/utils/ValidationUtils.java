@@ -1,6 +1,10 @@
 package main.java.com.example.utils;
 import main.java.com.example.exceptions.InvalidInputException;
 
+import main.java.com.example.utils.RegexValidator;
+import main.java.com.example.exceptions.InvalidInputException;
+
+
 
 import java.util.Scanner;
 
@@ -226,4 +230,24 @@ public class ValidationUtils {
             throw new InvalidInputException("Invalid status value: " + status);
         }
     }
+
+    public static void requireValidProjectId(String projectId) {
+        if (!RegexValidator.isValidProjectId(projectId)) {
+            throw new InvalidInputException("Invalid Project ID. Expected formats: P### (Week3) or PRJ#### (legacy).");
+        }
+    }
+
+    public static void requireValidTaskId(String taskId) {
+        if (!RegexValidator.isValidTaskId(taskId)) {
+            throw new InvalidInputException("Invalid Task ID. Expected formats: T### (Week3) or TSK#### (legacy).");
+        }
+    }
+
+
+    public static void requirePattern(String value, String fieldName, String regex) {
+        if (isValidString(value) || !value.matches(regex)) {
+            throw new InvalidInputException("Invalid " + fieldName + " format.");
+        }
+    }
+
 }

@@ -1,3 +1,4 @@
+
 package main.java.com.example.models;
 
 import main.java.com.example.interfaces.Completable;
@@ -18,7 +19,6 @@ public class Task implements Completable {
         return String.format("TSK%04d", taskCounter++);
     }
 
-
     public Task(String projectId, String taskName, String description,
                 String assignedTo, String priority, String dueDate) {
         this(generateTaskId(), projectId, taskName, description, assignedTo, priority, dueDate);
@@ -37,25 +37,16 @@ public class Task implements Completable {
     }
 
     public String getTaskId() { return taskId; }
-
     public String getProjectId() { return projectId; }
-
     public String getTaskName() { return taskName; }
-
     public String getDescription() { return description; }
-
     public String getAssignedTo() { return assignedTo; }
-
     public String getPriority() { return priority; }
-
     public String getStatus() { return status; }
-
     public void setStatus(String status) { this.status = status; }
-
     public String getDueDate() { return dueDate; }
 
     public boolean isCompleted() { return "Completed".equalsIgnoreCase(status); }
-
     public void completeTask() { this.status = "Completed"; }
 
     @Override
@@ -86,4 +77,16 @@ public class Task implements Completable {
     public String toString() {
         return String.format("Task[ID=%s, Name=%s, Status=%s, Priority=%s]", taskId, taskName, status, priority);
     }
+
+    // Phase 1: equality by stable identifier, needed for List/Map behavior
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Task)) return false;
+        Task other = (Task) o;
+        return taskId.equals(other.taskId);
+    }
+
+    @Override
+    public int hashCode() { return taskId.hashCode(); }
 }

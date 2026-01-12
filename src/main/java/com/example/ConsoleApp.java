@@ -6,6 +6,7 @@ import main.java.com.example.utils.ConsoleMenu;
 import main.java.com.example.utils.SessionManager;
 import main.java.com.example.utils.ValidationUtils;
 import main.java.com.example.models.HardwareProject;
+import main.java.com.example.services.ConcurrencyService;
 
 
 import java.util.Scanner;
@@ -17,14 +18,16 @@ public class ConsoleApp {
     private final TaskService taskService;
     private final ReportService reportService;
     private final SessionManager sessionManager;
+    private final ConcurrencyService concurrencyService;
 
-    public ConsoleApp(ConsoleMenu menu, Scanner scanner, ProjectService projectService, TaskService taskService, ReportService reportService, SessionManager sessionManager) {
+    public ConsoleApp(ConsoleMenu menu, Scanner scanner, ProjectService projectService, TaskService taskService, ReportService reportService, SessionManager sessionManager, ConcurrencyService concurrencyService) {
         this.sessionManager = sessionManager;
         this.reportService = reportService;
         this.menu = menu;
         this.scanner = scanner;
         this.projectService = projectService;
         this.taskService = taskService;
+        this.concurrencyService = concurrencyService;
     }
 
     private void simulateLogin() {
@@ -32,6 +35,7 @@ public class ConsoleApp {
         System.out.println("Login as:");
         System.out.println("1. Administrator");
         System.out.println("2. Regular User");
+
 
         int choice = ValidationUtils.getValidatedChoice(scanner, "Select user type (1-2): ", 1, 2);
 
@@ -54,6 +58,7 @@ public class ConsoleApp {
             5000.0, 5,
             "Sensor", 10
     );
+
 
 
 
@@ -320,7 +325,7 @@ public class ConsoleApp {
         boolean inTaskMenu = true;
         while (inTaskMenu) {
             menu.displayTaskMenu();
-            int choice = ValidationUtils.getValidatedChoice(scanner, "Enter your choice: ", 0, 8);
+            int choice = ValidationUtils.getValidatedChoice(scanner, "Enter your choice: ", 0, 9);
             try {
                 switch (choice) {
                     case 1 -> createNewTask();
@@ -344,6 +349,7 @@ public class ConsoleApp {
                     case 6 -> viewTasksByProject();
                     case 7 -> viewTasksByUser();
                     case 8 -> viewTasksByPriority();
+                    case 9 -> simulateConcurrentUpdatesFlow();
                     case 0 -> inTaskMenu = false;
                 }
             } catch (RuntimeException e) {
@@ -351,6 +357,27 @@ public class ConsoleApp {
             }
         }
     }
+
+
+    private void simulateConcurrentUpdatesFlow() {
+        int[] params = menu.promptConcurrencyParams();
+        int workers = params[0];
+        int opsPerWorker = params[1];
+
+        System.out.println();
+        System.out.println("=== Simulating Concurrent Updates (ExecutorService) ===");
+        concurrencyService.simulateConcurrentUpdatesWithExecutor(workers, opsPerWorker);
+
+        System.out.println();
+        System.out.println("=== Simulating Parallel Stream Updates ===");
+        concurrencyService.simulateParallelStreamUpdates();
+
+        System.out.println("✔ Simulation complete.");
+
+        menu.pause();
+
+    }
+
 
     private void createNewTask() {
         try {

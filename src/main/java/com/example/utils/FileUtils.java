@@ -1,10 +1,9 @@
 
-package test.java.com.example.utils;
+package main.java.com.example.utils;
 
 import main.java.com.example.models.Project;
 import main.java.com.example.models.Task;
 import main.java.com.example.services.ProjectService;
-import main.java.com.example.services.TaskService;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -182,8 +181,7 @@ public final class FileUtils {
                 for (String taskBlock : taskBlocks) {
                     Map<String, String> tf = extractFields(taskBlock);
                     Task task = new Task(
-                            tf.getOrDefault("id", ""),
-                            tf.getOrDefault("projectId", id),
+                            tf.getOrDefault("id", ""),id,
                             tf.getOrDefault("name", ""),
                             tf.getOrDefault("description", ""),
                             tf.getOrDefault("assignedTo", ""),
@@ -308,7 +306,7 @@ public final class FileUtils {
         public SimpleProject(String projectId, String projectName, String description,
                              String startDate, String endDate, double budget, int teamSize,
                              String status, String type) {
-            super(projectId, projectName, description, startDate, endDate, budget, teamSize, status);
+            super (projectId, projectName, description, startDate, endDate, budget, teamSize, status);
             this.type = (type == null || type.isBlank()) ? "Generic" : type;
         }
 
