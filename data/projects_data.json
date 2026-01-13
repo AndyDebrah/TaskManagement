@@ -1,0 +1,43 @@
+{
+  "projects": [
+    {
+      "id": "PRJ0001",
+      "name": "PROJ001",
+      "type": "Software Development",
+      "description": "E-Commerce Platform",
+      "startDate": "Online shopping platform with payment integration",
+      "endDate": "2025-01-01",
+      "status": "Active",
+      "budget": 100000.0,
+      "teamSize": 10,
+      "tasks": [
+      ]
+    },
+    {
+      "id": "PRJ0003",
+      "name": "PROJ003",
+      "type": "Hardware Development",
+      "description": "IoT Smart Home Hub",
+      "startDate": "Central hub for smart home devices",
+      "endDate": "2025-03-01",
+      "status": "Active",
+      "budget": 200000.0,
+      "teamSize": 8,
+      "tasks": [
+      ]
+    },
+    {
+      "id": "PRJ0002",
+      "name": "PROJ002",
+      "type": "Software Development",
+      "description": "Mobile Banking App",
+      "startDate": "Secure mobile banking application",
+      "endDate": "2025-02-01",
+      "status": "Active",
+      "budget": 150000.0,
+      "teamSize": 12,
+      "tasks": [
+      ]
+    }
+  ]
+}
