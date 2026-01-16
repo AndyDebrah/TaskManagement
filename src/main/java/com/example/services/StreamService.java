@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import main.java.com.example.interfaces.TaskFilter;
 /**
  * Stream-based utilities for tasks and projects.
  * This version aligns with FunctionalUtils for predicates, comparators, and collectors.
@@ -50,7 +51,15 @@ public class StreamService {
     private Stream<Project> streamProjects(Project[] projects) {
         return projects == null ? Stream.empty() : Arrays.stream(projects).filter(Objects::nonNull);
     }
+    /**  * List tasks matching a TaskFilter predicate.
+     */
+    public List<Task> filterTasks(Project project, TaskFilter filter) {
+        Objects.requireNonNull(filter, "filter");
+        return Arrays.stream(project.getTasks())
+                .filter(filter::test)
+                .collect(Collectors.toList());
 
+    }
     // ------------------------ Task operations ------------------------
 
     /** List completed tasks for a project. */

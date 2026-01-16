@@ -30,6 +30,7 @@ public class ConsoleMenu {
         System.out.println("4.  Reports & Analytics");
         System.out.println("5.  System Statistics");
         System.out.println("6. Switch User");
+        System.out.println("7.  Stream Analytics");
         System.out.println("0.  Exit");
         System.out.println("=======================================================================");
     }
@@ -75,6 +76,23 @@ public class ConsoleMenu {
         System.out.println("---------------------------------------------------------------");
     }
 
+
+    public void displayStreamAnalyticsMenu() {
+        System.out.println();
+        System.out.println("---------------------- STREAM ANALYTICS ----------------------");
+        System.out.println("1.  List completed tasks for a project");
+        System.out.println("2.  Distinct assignees (sorted)");
+        System.out.println("3.  Count tasks by status");
+        System.out.println("4.  Group tasks by priority");
+        System.out.println("5.  Top N tasks by name");
+        System.out.println("6.  Filter tasks by status and assignee");
+        System.out.println("7.  Average completion across all projects");
+        System.out.println("8.  Completed tasks (parallel)");
+        System.out.println("0.  Back to Main Menu");
+        System.out.println("-------------------------------------------------------------");
+    }
+
+
     public void displaySystemStats() {
         System.out.println();
         System.out.println("------------------------ SYSTEM STATISTICS ---------------------");
@@ -90,6 +108,8 @@ public class ConsoleMenu {
         System.out.println("A small console application to manage projects and tasks.");
         System.out.println("======================================================================");
     }
+
+
 
     public void displayExitMessage() {
         System.out.println();

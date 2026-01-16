@@ -1,5 +1,7 @@
 package main.java.com.example;
 
+import main.java.com.example.interfaces.TaskFilter;
+import main.java.com.example.interfaces.TaskFilters;
 import main.java.com.example.models.*;
 import main.java.com.example.services.*;
 import main.java.com.example.utils.ConsoleMenu;
@@ -7,8 +9,13 @@ import main.java.com.example.utils.SessionManager;
 import main.java.com.example.utils.ValidationUtils;
 import main.java.com.example.models.HardwareProject;
 import main.java.com.example.services.ConcurrencyService;
+import org.w3c.dom.ls.LSOutput;
 
-
+import java.sql.SQLOutput;
+import java.util.List;
+import java.util.Map;
+import main.java.com.example.models.Project;
+import main.java.com.example.models.Task;
 import java.util.Scanner;
 
 public class ConsoleApp {
@@ -52,6 +59,7 @@ public class ConsoleApp {
         sessionManager.getCurrentUser().displayUserInfo();
         menu.pause();
     }
+    StreamService streamService = new StreamService();
     HardwareProject project = new HardwareProject(
             "Smart Sensor", "IoT Hardware Project",
             "2026-01-01", "2026-03-31",
@@ -60,6 +68,17 @@ public class ConsoleApp {
     );
 
 
+
+
+// taskfilter demo
+    private void runStreamDemo() {
+        TaskFilter filter = t -> t != null
+                && "Completed".equalsIgnoreCase(t.getStatus())
+                && "USR1".equalsIgnoreCase(t.getAssignedTo());
+
+        List<Task> filteredTasks = streamService.filterTasks(project, filter);
+        filteredTasks.forEach(t -> System.out.println("Filtered Task: " + t.getTaskName()));
+    }
 
 
     private void switchUser() {
@@ -99,7 +118,7 @@ public class ConsoleApp {
         boolean running = true;
         while (running) {
             menu.displayMainMenu();
-            int choice = ValidationUtils.getValidatedChoice(scanner, "Enter your choice: ", 0, 6);
+            int choice = ValidationUtils.getValidatedChoice(scanner, "Enter your choice: ", 0, 7);
             try {
                 switch (choice) {
                     case 1 -> handleProjectManagement();
@@ -111,6 +130,7 @@ public class ConsoleApp {
                         menu.pause();
                     }
                     case 6 -> switchUser();
+                    case 7 -> handleStreamAnalytics();
                     case 0 -> running = false;
                 }
             } catch (RuntimeException e) {
@@ -377,6 +397,116 @@ public class ConsoleApp {
         menu.pause();
 
     }
+
+    // --- STREAM ANALYTICS HANDLER (paste inside ConsoleApp class) ---
+    private void handleStreamAnalytics() {
+        boolean inMenu = true;
+        while (inMenu) {
+            menu.displayStreamAnalyticsMenu();
+            int choice = ValidationUtils.getValidatedChoice(scanner, "Choose: ", 0, 8);
+
+            try {
+                switch (choice) {
+                    case 1 -> {
+                        String projectId = ValidationUtils.getValidatedString(scanner, "Project ID: ");
+                        ValidationUtils.requireValidProjectId(projectId);
+                        Project p = projectService.findProjectById(projectId);
+
+                        List<Task> completed = streamService.listCompletedTasks(p);
+                        if (completed.isEmpty()) System.out.println("No completed tasks.");
+                        completed.forEach(t -> System.out.printf("%s - %s%n", t.getTaskId(), t.getTaskName()));
+                        menu.pause();
+                    }
+                    case 2 -> {
+                        String projectId = ValidationUtils.getValidatedString(scanner, "Project ID: ");
+                        ValidationUtils.requireValidProjectId(projectId);
+                        Project p = projectService.findProjectById(projectId);
+
+                        List<String> assignees = streamService.distinctAssignees(p);
+                        System.out.println("Assignees (sorted): " + assignees);
+                        menu.pause();
+                    }
+                    case 3 -> {
+                        String projectId = ValidationUtils.getValidatedString(scanner, "Project ID: ");
+                        ValidationUtils.requireValidProjectId(projectId);
+                        Project p = projectService.findProjectById(projectId);
+
+                        streamService.countTasksByStatus(p)
+                                .forEach((status, count) -> System.out.printf("%-12s : %d%n", status, count));
+                        menu.pause();
+                    }
+                    case 4 -> {
+                        String projectId = ValidationUtils.getValidatedString(scanner, "Project ID: ");
+                        ValidationUtils.requireValidProjectId(projectId);
+                        Project p = projectService.findProjectById(projectId);
+
+                        streamService.groupTasksByPriority(p)
+                                .forEach((prio, list) -> System.out.printf("%-8s -> %d%n", prio, list.size()));
+                        menu.pause();
+                    }
+                    case 5 -> {
+                        String projectId = ValidationUtils.getValidatedString(scanner, "Project ID: ");
+                        ValidationUtils.requireValidProjectId(projectId);
+                        int n = ValidationUtils.getValidatedPositiveInteger(scanner, "Top N: ");
+
+                        Project p = projectService.findProjectById(projectId);
+                        List<Task> topN = streamService.topNTasksByName(p, n);
+                        if (topN.isEmpty()) System.out.println("No tasks found.");
+                        topN.forEach(t -> System.out.println(t.getTaskName()));
+                        menu.pause();
+                    }
+                    case 6 -> {
+                        String projectId = ValidationUtils.getValidatedString(scanner, "Project ID: ");
+                        ValidationUtils.requireValidProjectId(projectId);
+                        Project p = projectService.findProjectById(projectId);
+
+                        // Minimal TaskFilter (as per your requirement doc)
+                        System.out.print("Filter criteria (leave blank to skip):");
+                        String status = scanner.nextLine().trim();
+                        if(!status.isBlank()) {
+                            ValidationUtils.requireValidStatus(status);
+                        }
+                        System.out.println("Assignee (leave blank to skip): ");
+                        String assignee = scanner.nextLine().trim();
+                        if(!assignee.isBlank()) {
+                            ValidationUtils.requireNonEmpty(assignee, "Assignee");
+                        }
+
+
+                        TaskFilter filter = t ->
+                                (status.isBlank() || status.equalsIgnoreCase(t.getStatus())) &&
+                                        (assignee.isBlank() || assignee.equalsIgnoreCase(t.getAssignedTo()));
+
+                        List<Task> results = streamService.filterTasks(p, filter);
+                        if (results.isEmpty()) System.out.println("No tasks matched your filters.");
+                        results.forEach(t -> System.out.printf("%s - %s (%s)%n",
+                                t.getTaskId(), t.getTaskName(), t.getStatus()));
+                        menu.pause();
+                    }
+                    case 7 -> {
+                        double avg = streamService.averageProjectCompletion(projectService);
+                        System.out.printf("Average completion across all projects: %.2f%%%n", avg);
+                        menu.pause();
+                    }
+                    case 8 -> {
+                        String projectId = ValidationUtils.getValidatedString(scanner, "Project ID: ");
+                        ValidationUtils.requireValidProjectId(projectId);
+                        Project p = projectService.findProjectById(projectId);
+
+                        List<Task> par = streamService.listCompletedTasksParallel(p);
+                        System.out.printf("Completed (parallel): %d%n", par.size());
+                        menu.pause();
+                    }
+                    case 0 -> inMenu = false;
+                    default -> System.out.println("Unknown option.");
+                }
+            } catch (RuntimeException ex) {
+                System.err.println("Error: " + ex.getMessage());
+                menu.pause();
+            }
+        }
+    }
+
 
 
     private void createNewTask() {

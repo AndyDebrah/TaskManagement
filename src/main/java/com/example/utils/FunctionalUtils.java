@@ -86,9 +86,10 @@ public final class FunctionalUtils {
         return p -> p != null && p.calculateCompletionPercentage() >= thresholdPercent;
     }
 
-    /** Project isCompleted() as defined by Project (100%). */
+    /** Project considered completed when completionPercentage >= 100.0. */
     public static Predicate<Project> isCompletedProject() {
-        return p -> p != null && p.isCompleted();
+        // Use calculateCompletionPercentage() for robustness across builds
+        return p -> p != null && p.calculateCompletionPercentage() >= 100.0;
     }
 
     /** Project name contains token (case-insensitive). */
@@ -208,7 +209,7 @@ public final class FunctionalUtils {
         );
     }
 
-    /** Average completion percentage across projects (empty stream -> 0.0). */
+    /** Average completion percentage across projects (empty -> 0.0). */
     public static double averageProjectCompletion(Collection<Project> projects) {
         if (projects == null || projects.isEmpty()) return 0.0;
         return projects.stream()

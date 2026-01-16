@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 /** Common abstract project class. */
 public abstract class Project {
-    private static int projectCounter = 1;
+    private static int projectCounter = 4;
     private final String projectId;
     private String projectName;
     private String description;
