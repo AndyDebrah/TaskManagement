@@ -1,10 +1,12 @@
-package test.java.com.example.utils;
+package com.example.utils;
 
-import main.java.com.example.exceptions.InvalidInputException;
-import main.java.com.example.utils.ValidationUtils;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import com.example.exceptions.InvalidInputException;
 
 class ValidationTest {
 

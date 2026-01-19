@@ -1,11 +1,12 @@
-package test.java.com.example.models;
+package com.example.models;
 
-import main.java.com.example.models.SoftwareProject;
-import main.java.com.example.models.Task;
+import com.example.models.SoftwareProject;
+import com.example.models.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 
 class TaskTest {
     private Task t;

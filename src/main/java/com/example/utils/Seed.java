@@ -1,6 +1,6 @@
-package main.java.com.example.utils;
+package com.example.utils;
 
-import main.java.com.example.models.*;
+import com.example.models.*;
 
 public class Seed {
 

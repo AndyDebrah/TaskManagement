@@ -1,9 +1,9 @@
 
-package test.java.com.example.models;
+package com.example.models;
 
-import main.java.com.example.models.Project;
-import main.java.com.example.models.Task;
-import main.java.com.example.services.StreamService;
+import com.example.models.Project;
+import com.example.models.Task;
+import com.example.services.StreamService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,22 +1,24 @@
-package main.java.com.example;
+package com.example;
 
-import main.java.com.example.interfaces.TaskFilter;
-import main.java.com.example.interfaces.TaskFilters;
-import main.java.com.example.models.*;
-import main.java.com.example.services.*;
-import main.java.com.example.utils.ConsoleMenu;
-import main.java.com.example.utils.SessionManager;
-import main.java.com.example.utils.ValidationUtils;
-import main.java.com.example.models.HardwareProject;
-import main.java.com.example.services.ConcurrencyService;
-import org.w3c.dom.ls.LSOutput;
-
-import java.sql.SQLOutput;
 import java.util.List;
-import java.util.Map;
-import main.java.com.example.models.Project;
-import main.java.com.example.models.Task;
 import java.util.Scanner;
+
+import com.example.interfaces.TaskFilter;
+import com.example.models.AdminUser;
+import com.example.models.HardwareProject;
+import com.example.models.Project;
+import com.example.models.RegularUser;
+import com.example.models.SoftwareProject;
+import com.example.models.Task;
+import com.example.models.User;
+import com.example.services.ConcurrencyService;
+import com.example.services.ProjectService;
+import com.example.services.ReportService;
+import com.example.services.StreamService;
+import com.example.services.TaskService;
+import com.example.utils.ConsoleMenu;
+import com.example.utils.SessionManager;
+import com.example.utils.ValidationUtils;
 
 public class ConsoleApp {
     private final ConsoleMenu menu;
@@ -27,7 +29,8 @@ public class ConsoleApp {
     private final SessionManager sessionManager;
     private final ConcurrencyService concurrencyService;
 
-    public ConsoleApp(ConsoleMenu menu, Scanner scanner, ProjectService projectService, TaskService taskService, ReportService reportService, SessionManager sessionManager, ConcurrencyService concurrencyService) {
+    public ConsoleApp(ConsoleMenu menu, Scanner scanner, ProjectService projectService, TaskService taskService,
+                      ReportService reportService, SessionManager sessionManager, ConcurrencyService concurrencyService) {
         this.sessionManager = sessionManager;
         this.reportService = reportService;
         this.menu = menu;
@@ -42,7 +45,6 @@ public class ConsoleApp {
         System.out.println("Login as:");
         System.out.println("1. Administrator");
         System.out.println("2. Regular User");
-
 
         int choice = ValidationUtils.getValidatedChoice(scanner, "Select user type (1-2): ", 1, 2);
 
@@ -59,18 +61,15 @@ public class ConsoleApp {
         sessionManager.getCurrentUser().displayUserInfo();
         menu.pause();
     }
+
     StreamService streamService = new StreamService();
     HardwareProject project = new HardwareProject(
             "Smart Sensor", "IoT Hardware Project",
             "2026-01-01", "2026-03-31",
             5000.0, 5,
-            "Sensor", 10
-    );
+            "Sensor", 10);
 
-
-
-
-// taskfilter demo
+    // taskfilter demo
     private void runStreamDemo() {
         TaskFilter filter = t -> t != null
                 && "Completed".equalsIgnoreCase(t.getStatus())
@@ -79,7 +78,6 @@ public class ConsoleApp {
         List<Task> filteredTasks = streamService.filterTasks(project, filter);
         filteredTasks.forEach(t -> System.out.println("Filtered Task: " + t.getTaskName()));
     }
-
 
     private void switchUser() {
         System.out.println("\nSWITCH USER");
@@ -208,7 +206,6 @@ public class ConsoleApp {
         int teamSize = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter Team Size: ");
         int budgetInt = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter Budget (whole number): ");
 
-
         return new SoftwareProject(name, description, startDate, endDate,
                 budgetInt, teamSize, techStack, methodology, totalFeatures);
     }
@@ -224,7 +221,6 @@ public class ConsoleApp {
         int totalComponents = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter Total Components: ");
         int teamSize = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter Team Size: ");
         int budgetInt = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter Budget (whole number): ");
-
 
         return new HardwareProject(name, description, startDate, endDate,
                 budgetInt, teamSize, hardwareType, totalComponents);
@@ -257,10 +253,11 @@ public class ConsoleApp {
             System.out.println("What would you like to update? 1.Name  2.Description  3.Status  4.End Date");
             int choice = ValidationUtils.getValidatedChoice(scanner, "Enter choice (1-4): ", 1, 4);
 
-
             switch (choice) {
-                case 1 -> project.setProjectName(ValidationUtils.getValidatedTextField(scanner, "Enter new name: ", "Project Name"));
-                case 2 -> project.setDescription(ValidationUtils.getValidatedTextField(scanner, "Enter new description: ", "Description"));
+                case 1 ->
+                        project.setProjectName(ValidationUtils.getValidatedTextField(scanner, "Enter new name: ", "Project Name"));
+                case 2 -> project
+                        .setDescription(ValidationUtils.getValidatedTextField(scanner, "Enter new description: ", "Description"));
                 case 3 -> project.setStatus(ValidationUtils.getValidatedString(scanner, "Enter new status: "));
                 case 4 -> project.setEndDate(ValidationUtils.getValidatedDate(scanner, "Enter new end date (YYYY-MM-DD): "));
             }
@@ -378,7 +375,6 @@ public class ConsoleApp {
         }
     }
 
-
     private void simulateConcurrentUpdatesFlow() {
         int[] params = menu.promptConcurrencyParams();
         int workers = params[0];
@@ -392,7 +388,7 @@ public class ConsoleApp {
         System.out.println("=== Simulating Parallel Stream Updates ===");
         concurrencyService.simulateParallelStreamUpdates();
 
-        System.out.println("✔ Simulation complete.");
+        System.out.println("âœ” Simulation complete.");
 
         menu.pause();
 
@@ -413,7 +409,8 @@ public class ConsoleApp {
                         Project p = projectService.findProjectById(projectId);
 
                         List<Task> completed = streamService.listCompletedTasks(p);
-                        if (completed.isEmpty()) System.out.println("No completed tasks.");
+                        if (completed.isEmpty())
+                            System.out.println("No completed tasks.");
                         completed.forEach(t -> System.out.printf("%s - %s%n", t.getTaskId(), t.getTaskName()));
                         menu.pause();
                     }
@@ -451,7 +448,8 @@ public class ConsoleApp {
 
                         Project p = projectService.findProjectById(projectId);
                         List<Task> topN = streamService.topNTasksByName(p, n);
-                        if (topN.isEmpty()) System.out.println("No tasks found.");
+                        if (topN.isEmpty())
+                            System.out.println("No tasks found.");
                         topN.forEach(t -> System.out.println(t.getTaskName()));
                         menu.pause();
                     }
@@ -463,22 +461,21 @@ public class ConsoleApp {
                         // Minimal TaskFilter (as per your requirement doc)
                         System.out.print("Filter criteria (leave blank to skip):");
                         String status = scanner.nextLine().trim();
-                        if(!status.isBlank()) {
+                        if (!status.isBlank()) {
                             ValidationUtils.requireValidStatus(status);
                         }
                         System.out.println("Assignee (leave blank to skip): ");
                         String assignee = scanner.nextLine().trim();
-                        if(!assignee.isBlank()) {
+                        if (!assignee.isBlank()) {
                             ValidationUtils.requireNonEmpty(assignee, "Assignee");
                         }
 
-
-                        TaskFilter filter = t ->
-                                (status.isBlank() || status.equalsIgnoreCase(t.getStatus())) &&
-                                        (assignee.isBlank() || assignee.equalsIgnoreCase(t.getAssignedTo()));
+                        TaskFilter filter = t -> (status.isBlank() || status.equalsIgnoreCase(t.getStatus())) &&
+                                (assignee.isBlank() || assignee.equalsIgnoreCase(t.getAssignedTo()));
 
                         List<Task> results = streamService.filterTasks(p, filter);
-                        if (results.isEmpty()) System.out.println("No tasks matched your filters.");
+                        if (results.isEmpty())
+                            System.out.println("No tasks matched your filters.");
                         results.forEach(t -> System.out.printf("%s - %s (%s)%n",
                                 t.getTaskId(), t.getTaskName(), t.getStatus()));
                         menu.pause();
@@ -506,8 +503,6 @@ public class ConsoleApp {
             }
         }
     }
-
-
 
     private void createNewTask() {
         try {
@@ -573,7 +568,6 @@ public class ConsoleApp {
             case 2 -> task.setStatus("In Progress");
             case 3 -> task.setStatus("Completed");
         }
-
 
         try {
             taskService.updateTask(task.getTaskId(), task);
@@ -751,7 +745,6 @@ public class ConsoleApp {
         }
         return task;
     }
-
 
     private void showError(RuntimeException e) {
         System.out.println("Error: " + e.getMessage());

@@ -1,0 +1,167 @@
+
+{
+  "projects": [
+    {
+      "id": "PRJ0005",
+      "name": "PROJ001",
+      "type": "Software Development",
+      "description": "E-Commerce Platform",
+      "startDate": "2025-01-01",
+      "endDate": "2025-06-30",
+      "status": "Active",
+      "budget": 100000.0,
+      "teamSize": 10,
+      "tasks": [
+        {
+          "id": "TSK1001",
+          "name": "Design database schema",
+          "projectId": "PRJ0005",
+          "description": "ERD and normalization",
+          "assignedTo": "Ama",
+          "priority": "High",
+          "status": "Completed",
+          "dueDate": "2025-02-10"
+        },
+        {
+          "id": "TSK1002",
+          "name": "Implement product catalog",
+          "projectId": "PRJ0005",
+          "description": "CRUD and search",
+          "assignedTo": "Kofi",
+          "priority": "Medium",
+          "status": "Completed",
+          "dueDate": "2025-03-05"
+        },
+        {
+          "id": "TSK1003",
+          "name": "Integrate payment gateway",
+          "projectId": "PRJ0005",
+          "description": "Stripe integration",
+          "assignedTo": "Yaa",
+          "priority": "High",
+          "status": "Pending",
+          "dueDate": "2025-03-20"
+        },
+        {
+          "id": "TSK1004",
+          "name": "Checkout flow",
+          "projectId": "PRJ0005",
+          "description": "UX and validation",
+          "assignedTo": "Kwame",
+          "priority": "Low",
+          "status": "Pending",
+          "dueDate": "2025-04-01"
+        }
+      ]
+    },
+    {
+      "id": "PRJ0006",
+      "name": "PROJ002",
+      "type": "Software Development",
+      "description": "Mobile Banking App",
+      "startDate": "2025-01-15",
+      "endDate": "2025-08-31",
+      "status": "Active",
+      "budget": 150000.0,
+      "teamSize": 12,
+      "tasks": [
+        {
+          "id": "TSK2001",
+          "name": "KYC onboarding",
+          "projectId": "PRJ0006",
+          "description": "User verification flow",
+          "assignedTo": "Kojo",
+          "priority": "High",
+          "status": "Pending",
+          "dueDate": "2025-02-28"
+        },
+        {
+          "id": "TSK2002",
+          "name": "Fund transfers",
+          "projectId": "PRJ0006",
+          "description": "P2P transfers",
+          "assignedTo": "Abena",
+          "priority": "Medium",
+          "status": "In Progress",
+          "dueDate": "2025-03-15"
+        }
+      ]
+    },
+    {
+      "id": "PRJ0007",
+      "name": "PROJ003",
+      "type": "Hardware Development",
+      "description": "IoT Smart Home Hub",
+      "startDate": "2025-01-10",
+      "endDate": "2025-09-30",
+      "status": "Active",
+      "budget": 200000.0,
+      "teamSize": 8,
+      "tasks": [
+        {
+          "id": "TSK3001",
+          "name": "RF module bring-up",
+          "projectId": "PRJ0007",
+          "description": "BLE/Zigbee test",
+          "assignedTo": "Esi",
+          "priority": "High",
+          "status": "Completed",
+          "dueDate": "2025-02-20"
+        },
+        {
+          "id": "TSK3002",
+          "name": "PCB layout rev A",
+          "projectId": "PRJ0007",
+          "description": "4-layer board",
+          "assignedTo": "Yaw",
+          "priority": "High",
+          "status": "Completed",
+          "dueDate": "2025-03-01"
+        },
+        {
+          "id": "TSK3003",
+          "name": "Firmware OTA",
+          "projectId": "PRJ0007",
+          "description": "Secure update",
+          "assignedTo": "Afia",
+          "priority": "Medium",
+          "status": "Completed",
+          "dueDate": "2025-03-25"
+        }
+      ]
+    },
+    {
+      "id": "PRJ0009",
+      "name": "mobile app",
+      "type": "Software Development",
+      "description": "ecommerce",
+      "startDate": "2028-08-09",
+      "endDate": "2029-09-09",
+      "status": "Active",
+      "budget": 4.0,
+      "teamSize": 4,
+      "tasks": [
+        {
+          "id": "TSK9001",
+          "name": "Login screen",
+          "projectId": "PRJ0009",
+          "description": "Email/OTP login",
+          "assignedTo": "Nana",
+          "priority": "Low",
+          "status": "Completed",
+          "dueDate": "2028-10-01"
+        },
+        {
+          "id": "TSK9002",
+          "name": "Product list",
+          "projectId": "PRJ0009",
+          "description": "Recycler view and filters",
+          "assignedTo": "Yaw",
+          "priority": "Low",
+          "status": "Pending",
+          "dueDate": "2028-10-10"
+        }
+      ]
+    }
+  ]
+}

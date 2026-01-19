@@ -1,15 +1,17 @@
 
-package main.java.com.example.services;
+package com.example.services;
 
-import main.java.com.example.models.Project;
-import main.java.com.example.models.Task;
-import main.java.com.example.exceptions.TaskNotFoundException;
-import main.java.com.example.exceptions.ProjectNotFoundException;
-import main.java.com.example.exceptions.InvalidInputException;
-import main.java.com.example.utils.ValidationUtils;
+import com.example.models.Project;
+import com.example.models.Task;
+import com.example.exceptions.TaskNotFoundException;
+import com.example.exceptions.ProjectNotFoundException;
+import com.example.exceptions.InvalidInputException;
+import com.example.utils.ValidationUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+
+
 
 /** Service class for managing task operations. */
 public class TaskService {

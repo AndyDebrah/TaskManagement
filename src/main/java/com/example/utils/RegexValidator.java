@@ -1,7 +1,6 @@
 
-package main.java.com.example.utils;
+package com.example.utils;
 
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 public final class RegexValidator {

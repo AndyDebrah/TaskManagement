@@ -1,16 +1,22 @@
 
-package main.java.com.example.services;
+package com.example.services;
 
-import main.java.com.example.models.Project;
-import main.java.com.example.models.Task;
-import main.java.com.example.utils.FunctionalUtils;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.IntSummaryStatistics;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import main.java.com.example.interfaces.TaskFilter;
+import com.example.interfaces.TaskFilter;
+import com.example.models.Project;
+import com.example.models.Task;
+import com.example.utils.FunctionalUtils;
 /**
  * Stream-based utilities for tasks and projects.
  * This version aligns with FunctionalUtils for predicates, comparators, and collectors.

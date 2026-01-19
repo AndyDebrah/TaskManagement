@@ -1,8 +1,8 @@
 
-package main.java.com.example.services;
+package com.example.services;
 
-import main.java.com.example.models.Project;
-import main.java.com.example.models.Task;
+import com.example.models.Project;
+import com.example.models.Task;
 
 import java.time.Duration;
 import java.time.Instant;

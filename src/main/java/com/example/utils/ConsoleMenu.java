@@ -1,9 +1,9 @@
-package main.java.com.example.utils;
+package com.example.utils;
 
 import java.util.Scanner;
 
-import main.java.com.example.services.ProjectService;
-import main.java.com.example.services.TaskService;
+import com.example.services.ProjectService;
+import com.example.services.TaskService;
 
 /**
  * Console menu system for user interaction.

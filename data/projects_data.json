@@ -1,21 +1,8 @@
 {
   "projects": [
     {
-      "id": "PRJ0001",
-      "name": "Ecommerce Platform",
-      "type": "Software Development",
-      "description": "E-Commerce Platform",
-      "startDate": "Online shopping platform with payment integration",
-      "endDate": "2025-01-01",
-      "status": "Active",
-      "budget": 100000.0,
-      "teamSize": 10,
-      "tasks": [
-      ]
-    },
-    {
-      "id": "PRJ0003",
-      "name": "Personal Finance App",
+      "id": "PRJ0005",
+      "name": "PROJ002",
       "type": "Software Development",
       "description": "Mobile Banking App",
       "startDate": "Secure mobile banking application",
@@ -27,8 +14,21 @@
       ]
     },
     {
-      "id": "PRJ0002",
-      "name": "SMART-HOME",
+      "id": "PRJ0004",
+      "name": "PROJ001",
+      "type": "Software Development",
+      "description": "E-Commerce Platform",
+      "startDate": "Online shopping platform with payment integration",
+      "endDate": "2025-01-01",
+      "status": "Active",
+      "budget": 100000.0,
+      "teamSize": 10,
+      "tasks": [
+      ]
+    },
+    {
+      "id": "PRJ0006",
+      "name": "PROJ003",
       "type": "Hardware Development",
       "description": "IoT Smart Home Hub",
       "startDate": "Central hub for smart home devices",
@@ -36,32 +36,6 @@
       "status": "Active",
       "budget": 200000.0,
       "teamSize": 8,
-      "tasks": [
-      ]
-    },
-    {
-      "id": "PRJ0005",
-      "name": "mobile bank app",
-      "type": "Software Development",
-      "description": "to assist mobile banking",
-      "startDate": "2029-09-09",
-      "endDate": "2029-09-09",
-      "status": "Active",
-      "budget": 1200.0,
-      "teamSize": 7,
-      "tasks": [
-      ]
-    },
-    {
-      "id": "PRJ0004",
-      "name": "Healthcare Management System",
-      "type": "Software Development",
-      "description": "Hospital Management Software",
-      "startDate": "Comprehensive system for hospital operations",
-      "endDate": "2025-04-01",
-      "status": "Active",
-      "budget": 250000.0,
-      "teamSize": 15,
       "tasks": [
       ]
     }

@@ -1,4 +1,4 @@
-package main.java.com.example.models;
+package com.example.models;
 
 /** Abstract base class for user types. */
 public abstract class User {

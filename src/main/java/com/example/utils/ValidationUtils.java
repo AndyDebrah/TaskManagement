@@ -1,8 +1,8 @@
-package main.java.com.example.utils;
-import main.java.com.example.exceptions.InvalidInputException;
+package com.example.utils;
+import com.example.exceptions.InvalidInputException;
 
-import main.java.com.example.utils.RegexValidator;
-import main.java.com.example.exceptions.InvalidInputException;
+import com.example.utils.RegexValidator;
+import com.example.exceptions.InvalidInputException;
 
 
 

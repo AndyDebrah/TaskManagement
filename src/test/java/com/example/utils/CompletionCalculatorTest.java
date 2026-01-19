@@ -1,14 +1,13 @@
-package test.java.com.example.utils;
-
-import main.java.com.example.models.Task;
-import main.java.com.example.utils.CompletionCalculator;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+package com.example.utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import com.example.models.Task;
 
 class CompletionCalculatorTest {
 

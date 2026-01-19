@@ -1,4 +1,4 @@
-package main.java.com.example.models;
+package com.example.models;
 
 /** Regular user with standard permissions. */
 public class RegularUser extends User {

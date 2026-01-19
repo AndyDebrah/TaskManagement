@@ -1,8 +1,8 @@
 
-package main.java.com.example.utils;
+package com.example.utils;
 
-import main.java.com.example.models.Project;
-import main.java.com.example.models.Task;
+import com.example.models.Project;
+import com.example.models.Task;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;

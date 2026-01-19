@@ -1,7 +1,7 @@
-package main.java.com.example.models;
+package com.example.models;
 
-import main.java.com.example.services.ProjectService;
-import main.java.com.example.services.TaskService;
+import com.example.services.ProjectService;
+import com.example.services.TaskService;
 
 /**
  * Utility class for generating status reports

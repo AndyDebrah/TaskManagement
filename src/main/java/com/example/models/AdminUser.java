@@ -1,4 +1,4 @@
-package main.java.com.example.models;
+package com.example.models;
 
 /** Administrator user with full system permissions. */
 public class AdminUser extends User {

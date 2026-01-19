@@ -1,4 +1,4 @@
-package main.java.com.example.interfaces;
+package com.example.interfaces;
 
 /**
  * Contract for objects that support completion tracking.

@@ -1,4 +1,4 @@
-package main.java.com.example.models;
+package com.example.models;
 
 /** Hardware development project implementation. */
 public class HardwareProject extends Project {

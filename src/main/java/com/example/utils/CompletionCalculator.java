@@ -1,9 +1,9 @@
-package main.java.com.example.utils;
-
-import main.java.com.example.models.Task;
+package com.example.utils;
 
 import java.util.List;
 import java.util.Objects;
+
+import com.example.models.Task;
 
 /**
  * Small utility to calculate completion percentage for an array or list of tasks.

@@ -1,17 +1,19 @@
-package test.java.com.example.utils;
-
-import main.java.com.example.models.Task;
-import main.java.com.example.services.ProjectService;
-import main.java.com.example.services.TaskService;
-import main.java.com.example.utils.FileUtils;
-import main.java.com.example.utils.Seed;
-import org.junit.jupiter.api.*;
+package com.example.utils;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import com.example.models.Project;
+import com.example.models.Task;
+import com.example.services.ProjectService;
+import com.example.services.TaskService;
 
 public class FilePersistenceTest {
 
@@ -33,6 +35,19 @@ public class FilePersistenceTest {
     void saveThenLoadRoundTrip() throws Exception {
         ProjectService ps = new ProjectService(Seed.seedProjects());
         TaskService ts = new TaskService(Seed.seedTasks(), ps);
+
+        // Get actual project IDs and add tasks to their projects
+        Project[] allProjects = ps.getAllProjects();
+        Task[] allTasks = Seed.seedTasks();
+        
+        // Map tasks to projects by index (since Seed creates 3 projects and 3 tasks in matching order)
+        int taskIndex = 0;
+        for (Project p : allProjects) {
+            if (p != null && taskIndex < allTasks.length && allTasks[taskIndex] != null) {
+                p.addTask(allTasks[taskIndex]);
+                taskIndex++;
+            }
+        }
 
         // save
         FileUtils.save(ps, tempFile);

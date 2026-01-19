@@ -1,10 +1,10 @@
-package test.java.com.example.models;
+package com.example.models;
 
-import main.java.com.example.models.HardwareProject;
-import main.java.com.example.models.SoftwareProject;
-import org.junit.Test;
+import com.example.models.HardwareProject;
+import com.example.models.SoftwareProject;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ProjectTest {
 

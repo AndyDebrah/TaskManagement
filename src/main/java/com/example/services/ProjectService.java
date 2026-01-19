@@ -1,10 +1,10 @@
 
-package main.java.com.example.services;
+package com.example.services;
 
-import main.java.com.example.models.Project;
-import main.java.com.example.exceptions.InvalidProjectDataException;
-import main.java.com.example.exceptions.ProjectNotFoundException;
-import main.java.com.example.utils.ValidationUtils;
+import com.example.models.Project;
+import com.example.exceptions.InvalidProjectDataException;
+import com.example.exceptions.ProjectNotFoundException;
+import com.example.utils.ValidationUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
