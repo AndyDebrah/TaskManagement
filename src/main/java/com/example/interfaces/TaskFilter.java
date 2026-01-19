@@ -9,5 +9,5 @@ import com.example.models.Task;
  */
 @FunctionalInterface
 public interface TaskFilter {
-    boolean test(Task task);
+  boolean test(Task task);
 }

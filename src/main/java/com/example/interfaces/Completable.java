@@ -4,8 +4,11 @@
  * Contract for objects that support completion tracking.
  */
 public interface Completable {
-    boolean isCompleted();
-    boolean markAsCompleted();
-    double getCompletionPercentage();
-    String getCompletionStatus();
+  boolean isCompleted();
+
+  boolean markAsCompleted();
+
+  double getCompletionPercentage();
+
+  String getCompletionStatus();
 }

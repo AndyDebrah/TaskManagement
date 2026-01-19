@@ -2,8 +2,7 @@
 
 public class EmptyProjectException extends RuntimeException {
 
-    public EmptyProjectException(String projectId) {
-            super("Error: Project with ID " + projectId + " has no tasks!");
-        }
-    }
-
+  public EmptyProjectException(String projectId) {
+    super("Error: Project with ID " + projectId + " has no tasks!");
+  }
+}
