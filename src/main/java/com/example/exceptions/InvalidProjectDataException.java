@@ -1,4 +1,4 @@
-package main.java.com.example.exceptions;
+﻿package com.example.exceptions;
 
 /**
  * Thrown when project data violates business rules

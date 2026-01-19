@@ -1,13 +1,14 @@
-package main.java.com.example.utils;
+﻿package com.example.utils;
 
-import main.java.com.example.models.*;
-
+import com.example.models.*;
 public class Seed {
 
     public static Project[] seedProjects() {
         Project[] projects = new Project[100];
 
         SoftwareProject swProject1 = new SoftwareProject(
+
+
                 "PROJ001",
                 "E-Commerce Platform",
                 "Online shopping platform with payment integration",
@@ -63,7 +64,7 @@ public class Seed {
         task2.setStatus("In Progress");
         task2.setStatus("In Progress");
         tasks[1] = task2;
-        Task task3 = new Task("TSK0003", "PROJ003", "Integrate Payment Gateway",
+        main.java.com.example.models.Task task3 = new Task("TSK0003", "PROJ003", "Integrate Payment Gateway",
                 "Add Stripe payment processing", "USR001", "High", "2025-01-21");
         tasks[2] = task3;
 //        Task task4 = new Task("TSK0004", "PROJ004", "Setup Firebase Backend",

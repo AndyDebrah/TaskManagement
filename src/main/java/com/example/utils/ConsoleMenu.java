@@ -1,9 +1,9 @@
-package main.java.com.example.utils;
+﻿package com.example.utils;
 
 import java.util.Scanner;
 
-import main.java.com.example.services.ProjectService;
-import main.java.com.example.services.TaskService;
+import com.example.services.ProjectService;
+import com.example.services.TaskService;
 
 /**
  * Console menu system for user interaction.
@@ -126,7 +126,7 @@ public class ConsoleMenu {
         System.out.println("=== Concurrent Updates Parameters ===");
         int workers = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter number of workers (e.g., 4): ");
         int opsPerWorker = ValidationUtils.getValidatedPositiveInteger(scanner, "Enter operations per worker (e.g., 50): ");
-        System.out.printf("→ Running with %d worker(s), %d op(s) each.%n", workers, opsPerWorker);
+        System.out.printf("â†’ Running with %d worker(s), %d op(s) each.%n", workers, opsPerWorker);
         return new int[]{workers, opsPerWorker};
     }
 

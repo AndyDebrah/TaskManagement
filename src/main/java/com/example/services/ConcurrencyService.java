@@ -1,8 +1,8 @@
+﻿
+package com.example.services;
 
-package main.java.com.example.services;
-
-import main.java.com.example.models.Project;
-import main.java.com.example.models.Task;
+import com.example.models.Project;
+import com.example.models.Task;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -82,7 +82,6 @@ public class ConcurrencyService {
     }
 
     /**
-     * Alternate approach: use parallel streams to update all tasks in parallel.
      * Functional style; thread safety must still be guaranteed by services/models.
      */
     public void simulateParallelStreamUpdates() {
@@ -109,7 +108,7 @@ public class ConcurrencyService {
         switch (choice) {
             case 0 -> {
                 // Mark completed
-                task.setStatus("Completed");
+                task.completeTask();
                 // Reflect in central store (update under TaskService to keep project association consistent)
                 taskService.updateTask(task.getTaskId(), task);
             }
@@ -146,6 +145,15 @@ public class ConcurrencyService {
         try { Thread.sleep(ms); } catch (InterruptedException ignored) { Thread.currentThread().interrupt(); }
     }
 
+    //helper for summarizing progress
+    private static double taskCompletionPercent(Project p) {
+        Task[] ts = p.getTasks();
+        if (ts == null || ts.length == 0) return -1.0;      // signal: no tasks
+        long done = java.util.Arrays.stream(ts).filter(Task::isCompleted).count();
+        return (done * 100.0) / ts.length;
+    }
+
+
     private void summarizeProgress() {
         // Print per-project completion summary (uses streams)
         List<Project> projects = List.of(projectService.getAllProjects());
@@ -154,8 +162,12 @@ public class ConcurrencyService {
         System.out.println("---- Completion Summary ----");
         projects.stream()
                 .sorted(Comparator.comparing(Project::getProjectId))
-                .forEach(p -> System.out.printf("%s (%s) -> %.2f%%%n",
-                        p.getProjectId(), p.getProjectName(), p.calculateCompletionPercentage()));
+                .forEach(p-> {
+                    double fromTasks = taskCompletionPercent(p);
+                    double pct = (fromTasks >= 0.0) ? fromTasks : p.calculateCompletionPercentage();
+                    System.out.printf("Project %s (%s): Completion = %.2f%%%n",
+                            p.getProjectId(), p.getProjectName(), pct);
+                });
 
         System.out.println("----------------------------");
     }

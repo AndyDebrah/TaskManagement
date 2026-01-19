@@ -1,7 +1,7 @@
+﻿
+package com.example.interfaces;
 
-package main.java.com.example.interfaces;
-
-import main.java.com.example.models.Task;
+import com.example.models.Task;
 
 /**
  * Functional interface for task filtering.

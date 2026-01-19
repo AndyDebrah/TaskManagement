@@ -1,4 +1,4 @@
-package main.java.com.example.models;
+﻿package com.example.models;
 
 /** Software development project implementation. */
 public class SoftwareProject extends Project {
@@ -29,6 +29,8 @@ public class SoftwareProject extends Project {
 
     @Override
     public double calculateCompletionPercentage() {
+        double taskBased = calculateCompletionFromTasks();
+        if (taskBased > 0) return taskBased;
         if (totalFeatures == 0) return 0.0;
         return (completedFeatures * 100.0) / totalFeatures;
     }

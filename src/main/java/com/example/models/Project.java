@@ -1,15 +1,12 @@
+﻿
+package com.example.models;
 
-package main.java.com.example.models;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 /** Common abstract project class. */
 public abstract class Project {
-    private static int projectCounter = 4;
+    private static int projectCounter = 5;
     private final String projectId;
     private String projectName;
     private String description;
@@ -171,6 +168,18 @@ public abstract class Project {
         Project other = (Project) o;
         return projectId.equals(other.projectId);
     }
+
+    public double calculateCompletionFromTasks() {
+        Task[] tasks = getTasks();
+        if (tasks.length == 0) return 0;
+
+        long completedCount = Arrays.stream(tasks)
+                .filter(Task::isCompleted)
+                .count();
+
+        return (completedCount * 100.0) / tasks.length;
+    }
+
 
     @Override
     public int hashCode() { return projectId.hashCode(); }

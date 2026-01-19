@@ -1,12 +1,12 @@
+﻿
+package com.example.services;
 
-package main.java.com.example.services;
-
-import main.java.com.example.models.Project;
-import main.java.com.example.models.Task;
-import main.java.com.example.exceptions.TaskNotFoundException;
-import main.java.com.example.exceptions.ProjectNotFoundException;
-import main.java.com.example.exceptions.InvalidInputException;
-import main.java.com.example.utils.ValidationUtils;
+import com.example.models.Project;
+import com.example.models.Task;
+import com.example.exceptions.TaskNotFoundException;
+import com.example.exceptions.ProjectNotFoundException;
+import com.example.exceptions.InvalidInputException;
+import com.example.utils.ValidationUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -109,12 +109,12 @@ public class TaskService {
         Project newProject = projectService.findProjectById(updatedTask.getProjectId());
 
         if (newProject == null) {
-            // Do NOT break → just update status and stay in old project
+            // Do NOT break â†’ just update status and stay in old project
             existing.setStatus(updatedTask.getStatus());
             tasksById.put(taskId, existing);
 
             System.out.printf(
-                    "⚠ Warning: Cannot reassign task %s → project %s does not exist. Status updated only.%n",
+                    "âš  Warning: Cannot reassign task %s â†’ project %s does not exist. Status updated only.%n",
                     taskId, updatedTask.getProjectId()
             );
 

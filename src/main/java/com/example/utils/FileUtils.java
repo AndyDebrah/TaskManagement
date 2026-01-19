@@ -1,9 +1,9 @@
+﻿
+package com.example.utils;
 
-package main.java.com.example.utils;
-
-import main.java.com.example.models.Project;
-import main.java.com.example.models.Task;
-import main.java.com.example.services.ProjectService;
+import com.example.models.Project;
+import com.example.models.Task;
+import com.example.services.ProjectService;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -20,41 +20,51 @@ import java.util.stream.Collectors;
 /**
  * File persistence utilities (Phase 3).
  * Saves and loads projects & tasks in a simple JSON-like text file.
+ *
+ * Key guarantees:
+ * - Tasks are NEVER treated as projects during load.
+ * - Task.projectId is read from "projectId" (exact case); if missing, we fall back to the parent project's id.
+ * - Uses the 7-arg Task constructor to preserve JSON-provided task IDs (e.g., TSK0007).
+ * - SimpleProject computes completion based on task completion ratio for loaded data.
  */
 public final class FileUtils {
 
     private FileUtils() {}
 
-    /** Container for load results to seed services. */
+    /** Wrapper representing loaded data from persistence file. */
     public static final class LoadResult {
         public final Project[] projects;
         public final Task[] tasks;
+
         public LoadResult(Project[] projects, Task[] tasks) {
             this.projects = projects;
             this.tasks = tasks;
         }
     }
 
-    /**
-     * Save all projects (and their tasks) to a JSON-like file.
-     * Uses try-with-resources and NIO.
-     */
+    /* =======================================================================
+       SAVE (two overloads)
+       ======================================================================= */
+
+    /** Save using a ProjectService source. */
     public static void save(ProjectService projectService, Path file) throws IOException {
         Objects.requireNonNull(projectService, "projectService");
         Objects.requireNonNull(file, "file");
+        save(projectService.getAllProjects(), file);
+    }
 
-        Project[] projects = projectService.getAllProjects();
+    /** Save using a Project[] source (same writer). */
+    public static void save(Project[] projects, Path file) throws IOException {
+        Objects.requireNonNull(projects, "projects");
+        Objects.requireNonNull(file, "file");
 
-        // Build JSON-like content
         String content = buildJsonLike(projects);
 
-        // Ensure parent directory exists
         Path parent = file.getParent();
         if (parent != null && !Files.exists(parent)) {
             Files.createDirectories(parent);
         }
 
-        // try-with-resources for clean resource management
         try (BufferedWriter writer = Files.newBufferedWriter(
                 file,
                 StandardCharsets.UTF_8,
@@ -65,9 +75,13 @@ public final class FileUtils {
         }
     }
 
+    /* =======================================================================
+       LOAD
+       ======================================================================= */
+
     /**
-     * Load projects & tasks from JSON-like file. Gracefully handles missing file.
-     * Returns empty arrays if file does not exist or is malformed.
+     * Load projects & tasks from a JSON-like file.
+     * Returns empty arrays on missing file or parse failure.
      */
     public static LoadResult load(Path file) {
         if (file == null || !Files.exists(file)) {
@@ -78,16 +92,17 @@ public final class FileUtils {
             String raw = reader.lines().collect(Collectors.joining("\n"));
             return parseJsonLike(raw);
         } catch (IOException e) {
-            // Malformed or unreadable file: return empty
             return new LoadResult(new Project[0], new Task[0]);
         }
     }
 
-    // ---------- Serialization (JSON-like) ----------
+    /* =======================================================================
+       JSON-LIKE WRITER
+       ======================================================================= */
 
     private static String escape(String s) {
         if (s == null) return "";
-        return s.replace("\"", "\\\"");
+        return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
     private static String buildJsonLike(Project[] projects) {
@@ -96,6 +111,7 @@ public final class FileUtils {
 
         for (int i = 0; i < projects.length; i++) {
             Project p = projects[i];
+
             sb.append("    {\n");
             sb.append("      \"id\": \"").append(escape(p.getProjectId())).append("\",\n");
             sb.append("      \"name\": \"").append(escape(p.getProjectName())).append("\",\n");
@@ -109,19 +125,19 @@ public final class FileUtils {
             sb.append("      \"tasks\": [\n");
 
             Task[] tasks = p.getTasks();
-            for (int j = 0; j < tasks.length; j++) {
-                Task t = tasks[j];
+            for (int t = 0; t < tasks.length; t++) {
+                Task task = tasks[t];
                 sb.append("        {\n");
-                sb.append("          \"id\": \"").append(escape(t.getTaskId())).append("\",\n");
-                sb.append("          \"name\": \"").append(escape(t.getTaskName())).append("\",\n");
-                sb.append("          \"projectId\": \"").append(escape(t.getProjectId())).append("\",\n");
-                sb.append("          \"description\": \"").append(escape(t.getDescription())).append("\",\n");
-                sb.append("          \"assignedTo\": \"").append(escape(t.getAssignedTo())).append("\",\n");
-                sb.append("          \"priority\": \"").append(escape(t.getPriority())).append("\",\n");
-                sb.append("          \"status\": \"").append(escape(t.getStatus())).append("\",\n");
-                sb.append("          \"dueDate\": \"").append(escape(t.getDueDate())).append("\"\n");
+                sb.append("          \"id\": \"").append(escape(task.getTaskId())).append("\",\n");
+                sb.append("          \"name\": \"").append(escape(task.getTaskName())).append("\",\n");
+                sb.append("          \"projectId\": \"").append(escape(task.getProjectId())).append("\",\n");
+                sb.append("          \"description\": \"").append(escape(task.getDescription())).append("\",\n");
+                sb.append("          \"assignedTo\": \"").append(escape(task.getAssignedTo())).append("\",\n");
+                sb.append("          \"priority\": \"").append(escape(task.getPriority())).append("\",\n");
+                sb.append("          \"status\": \"").append(escape(task.getStatus())).append("\",\n");
+                sb.append("          \"dueDate\": \"").append(escape(task.getDueDate())).append("\"\n");
                 sb.append("        }");
-                if (j < tasks.length - 1) sb.append(",");
+                if (t < tasks.length - 1) sb.append(",");
                 sb.append("\n");
             }
 
@@ -135,63 +151,86 @@ public final class FileUtils {
         return sb.toString();
     }
 
-    // ---------- Deserialization (JSON-like parsing via regex) ----------
+    /* =======================================================================
+       JSON-LIKE PARSER (safe & structure-aware)
+       ======================================================================= */
 
-    // Simple regex patterns for key-value pairs
-    private static final Pattern STRING_FIELD = Pattern.compile("\"([a-zA-Z]+)\"\\s*:\\s*\"(.*?)\"");
-    private static final Pattern NUMBER_FIELD = Pattern.compile("\"([a-zA-Z]+)\"\\s*:\\s*([0-9]+(?:\\.[0-9]+)?)");
+    // Simple key-value patterns
+    private static final Pattern STRING_FIELD =
+            Pattern.compile("\"([a-zA-Z][a-zA-Z0-9]*)\"\\s*:\\s*\"(.*?)\"");
+    private static final Pattern NUMBER_FIELD =
+            Pattern.compile("\"([a-zA-Z][a-zA-Z0-9]*)\"\\s*:\\s*([0-9]+(?:\\.[0-9]+)?)");
 
-    private static LoadResult parseJsonLike(String raw) {
-        // Split into project blocks: naive split on "},\n    {" between projects
-        String projectsSection = extractArray(raw, "projects");
-        if (projectsSection == null || projectsSection.isEmpty()) {
+    private static FileUtils.LoadResult parseJsonLike(String raw) {
+        if (raw == null || raw.isBlank()) {
             return new LoadResult(new Project[0], new Task[0]);
         }
 
-        List<String> projectBlocks = splitObjects(projectsSection);
+        String projectsSection = extractArray(raw, "projects");
+        if (projectsSection == null || projectsSection.isBlank()) {
+            return new LoadResult(new Project[0], new Task[0]);
+        }
+
+        List<String> projectBlocks = splitTopLevelObjects(projectsSection);
 
         List<Project> loadedProjects = new ArrayList<>();
         List<Task> loadedTasks = new ArrayList<>();
 
         for (String projectBlock : projectBlocks) {
-            Map<String, String> fields = extractFields(projectBlock);
+            Map<String, String> pf = extractFields(projectBlock);
 
-            String id        = fields.getOrDefault("id", "");
-            String name      = fields.getOrDefault("name", "");
-            String type      = fields.getOrDefault("type", "Generic");
-            String desc      = fields.getOrDefault("description", "");
-            String startDate = fields.getOrDefault("startDate", "");
-            String endDate   = fields.getOrDefault("endDate", "");
-            String status    = fields.getOrDefault("status", "Active");
-            double budget    = parseDouble(fields.get("budget"), 0.0);
-            int teamSize     = parseInt(fields.get("teamSize"), 0);
+            String projectId  = pf.getOrDefault("id", "");
+            String name       = pf.getOrDefault("name", "");
+            String type       = pf.getOrDefault("type", "Generic");
+            String desc       = pf.getOrDefault("description", "");
+            String startDate  = pf.getOrDefault("startDate", "");
+            String endDate    = pf.getOrDefault("endDate", "");
+            String status     = pf.getOrDefault("status", "Active");
+            double budget     = toDouble(pf.get("budget"), 0.0);
+            int teamSize      = toInt(pf.get("teamSize"), 0);
 
-            // Create a concrete project instance with the ID we read
-            Project project = ProjectFactory.create(id, name, desc, startDate, endDate, budget, teamSize, status, type);
-            if (project == null) {
-                // If factory failed, skip this project
-                continue;
-            }
+            // Construct a load-time concrete project (task-based completion).
+            Project project = ProjectFactory.create(projectId, name, desc, startDate, endDate, budget, teamSize, status, type);
+            if (project == null) continue;
             loadedProjects.add(project);
 
-            // Extract tasks array from project block
+            // Extract & parse this project's tasks
             String tasksSection = extractArray(projectBlock, "tasks");
-            if (tasksSection != null) {
-                List<String> taskBlocks = splitObjects(tasksSection);
-                for (String taskBlock : taskBlocks) {
-                    Map<String, String> tf = extractFields(taskBlock);
-                    Task task = new Task(
-                            tf.getOrDefault("id", ""),id,
-                            tf.getOrDefault("name", ""),
-                            tf.getOrDefault("description", ""),
-                            tf.getOrDefault("assignedTo", ""),
-                            tf.getOrDefault("priority", "Low"),
-                            tf.getOrDefault("dueDate", "")
-                    );
-                    task.setStatus(tf.getOrDefault("status", "Pending"));
-                    loadedTasks.add(task);
-                    project.addTask(task); // keep the project-task relationship
-                }
+            if (tasksSection == null || tasksSection.isBlank()) continue;
+
+            List<String> taskBlocks = splitTopLevelObjects(tasksSection);
+            for (String taskBlock : taskBlocks) {
+                Map<String, String> tf = extractFields(taskBlock);
+
+                String jsonTaskId  = tf.getOrDefault("id", "");
+                String jsonProjId  = tf.getOrDefault("projectId", ""); // exact key & case
+                String resolvedPid = jsonProjId.isBlank() ? projectId : jsonProjId;
+
+                // Skip malformed tasks
+                if (resolvedPid.isBlank()) continue;
+
+                String taskName    = tf.getOrDefault("name", "");
+                String description = tf.getOrDefault("description", "");
+                String assignedTo  = tf.getOrDefault("assignedTo", "");
+                String priorityRaw = tf.getOrDefault("priority", "Low");
+                String priority    = toTitleCase(priorityRaw.isBlank() ? "Low" : priorityRaw);
+                String dueDate     = tf.getOrDefault("dueDate", "");
+                String tStatus     = tf.getOrDefault("status", "Pending");
+
+                // Use 7-arg constructor to preserve taskId from JSON
+                Task task = new Task(
+                        jsonTaskId,
+                        resolvedPid,
+                        taskName,
+                        description,
+                        assignedTo,
+                        priority,
+                        dueDate
+                );
+                task.setStatus(tStatus);
+
+                project.addTask(task);
+                loadedTasks.add(task);
             }
         }
 
@@ -201,46 +240,70 @@ public final class FileUtils {
         );
     }
 
-    // Extract "[ ... ]" for a named array field: "projects": [ ... ]
+    /* =======================================================================
+       STRUCTURE-AWARE HELPERS
+       ======================================================================= */
+
+    // Extract the "[ ... ]" for a named array field:  "projects": [ ... ]
     private static String extractArray(String raw, String arrayName) {
         int idx = raw.indexOf("\"" + arrayName + "\"");
         if (idx < 0) return null;
+
         int start = raw.indexOf('[', idx);
         if (start < 0) return null;
 
         int depth = 0;
+        boolean inQuotes = false;
+
         for (int i = start; i < raw.length(); i++) {
             char c = raw.charAt(i);
-            if (c == '[') depth++;
-            else if (c == ']') {
-                depth--;
-                if (depth == 0) {
-                    return raw.substring(start + 1, i);
+
+            // flip quote state if not escaped
+            if (c == '"' && (i == 0 || raw.charAt(i - 1) != '\\')) {
+                inQuotes = !inQuotes;
+            }
+
+            if (!inQuotes) {
+                if (c == '[') depth++;
+                else if (c == ']') {
+                    depth--;
+                    if (depth == 0) return raw.substring(start + 1, i);
                 }
             }
         }
         return null;
     }
 
-    // Split top-level objects within an array: { ... }, { ... }, ...
-    private static List<String> splitObjects(String arrayContent) {
-        List<String> blocks = new ArrayList<>();
+    // Split ONLY top-level objects within an array: { ... }, { ... }, ...
+    private static List<String> splitTopLevelObjects(String arrayContent) {
+        List<String> objects = new ArrayList<>();
+        if (arrayContent == null || arrayContent.isBlank()) return objects;
+
         int depth = 0;
         int start = -1;
+        boolean inQuotes = false;
+
         for (int i = 0; i < arrayContent.length(); i++) {
             char c = arrayContent.charAt(i);
-            if (c == '{') {
-                if (depth == 0) start = i;
-                depth++;
-            } else if (c == '}') {
-                depth--;
-                if (depth == 0 && start >= 0) {
-                    blocks.add(arrayContent.substring(start, i + 1));
-                    start = -1;
+
+            if (c == '"' && (i == 0 || arrayContent.charAt(i - 1) != '\\')) {
+                inQuotes = !inQuotes;
+            }
+
+            if (!inQuotes) {
+                if (c == '{') {
+                    if (depth == 0) start = i;
+                    depth++;
+                } else if (c == '}') {
+                    depth--;
+                    if (depth == 0 && start >= 0) {
+                        objects.add(arrayContent.substring(start, i + 1));
+                        start = -1;
+                    }
                 }
             }
         }
-        return blocks;
+        return objects;
     }
 
     // Extract all string/number fields in a block
@@ -260,53 +323,52 @@ public final class FileUtils {
         return map;
     }
 
-    private static double parseDouble(String s, double def) {
-        try {
-            return s == null ? def : Double.parseDouble(s);
-        } catch (NumberFormatException e) {
-            return def;
-        }
+    private static double toDouble(String s, double def) {
+        try { return (s == null) ? def : Double.parseDouble(s); }
+        catch (NumberFormatException e) { return def; }
     }
 
-    private static int parseInt(String s, int def) {
-        try {
-            return s == null ? def : Integer.parseInt(s);
-        } catch (NumberFormatException e) {
-            return def;
-        }
+    private static int toInt(String s, int def) {
+        try { return (s == null) ? def : Integer.parseInt(s); }
+        catch (NumberFormatException e) { return def; }
     }
 
-    // ---------- Simple factory: choose a concrete Project type ----------
+    private static String toTitleCase(String s) {
+        if (s == null || s.isBlank()) return s;
+        String lower = s.toLowerCase(Locale.ROOT);
+        return Character.toUpperCase(lower.charAt(0)) + lower.substring(1);
+    }
+
+    /* =======================================================================
+       SIMPLE GENERIC PROJECT (Used only during load)
+       ======================================================================= */
 
     /**
      * Factory to construct concrete Projects when loading.
-     * You can replace this with SoftwareProject / HardwareProject constraints.
+     * If your domain needs SoftwareProject/HardwareProject during load, route here.
      */
     private static final class ProjectFactory {
         static Project create(String id, String name, String desc,
                               String startDate, String endDate,
                               double budget, int teamSize,
                               String status, String type) {
-            // If you have SoftwareProject/HardwareProject available, branch here:
-            // if ("Software".equalsIgnoreCase(type)) return new SoftwareProject(... with id ...);
-            // if ("Hardware".equalsIgnoreCase(type)) return new HardwareProject(... with id ...);
-            // Fallback: SimpleProject (generic concrete type)
+            // If you want: branch to SoftwareProject/HardwareProject based on "type".
+            // Currently we use a simple generic implementation with task-based completion.
             return new SimpleProject(id, name, desc, startDate, endDate, budget, teamSize, status, type);
         }
     }
 
     /**
-     * Generic concrete Project used for loading from file when real subclasses are not available.
+     * Generic concrete Project used only for loading.
      * Computes completion by proportion of completed tasks.
      */
     private static final class SimpleProject extends Project {
         private final String type;
 
-        // NOTE: requires a protected constructor in Project that accepts explicit id & status.
         public SimpleProject(String projectId, String projectName, String description,
                              String startDate, String endDate, double budget, int teamSize,
                              String status, String type) {
-            super (projectId, projectName, description, startDate, endDate, budget, teamSize, status);
+            super(projectId, projectName, description, startDate, endDate, budget, teamSize, status);
             this.type = (type == null || type.isBlank()) ? "Generic" : type;
         }
 
@@ -319,14 +381,9 @@ public final class FileUtils {
         }
 
         @Override
-        public String getProjectType() {
-            return type;
-        }
+        public String getProjectType() { return type; }
 
         @Override
-        public String getProjectDetails() {
-            return "Type: " + type;
-        }
+        public String getProjectDetails() { return "Type: " + type; }
     }
 }
-

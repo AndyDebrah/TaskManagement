@@ -1,8 +1,8 @@
-package main.java.com.example.utils;
-import main.java.com.example.exceptions.InvalidInputException;
+﻿package com.example.utils;
+import com.example.exceptions.InvalidInputException;
 
-import main.java.com.example.utils.RegexValidator;
-import main.java.com.example.exceptions.InvalidInputException;
+import com.example.utils.RegexValidator;
+import com.example.exceptions.InvalidInputException;
 
 
 
@@ -136,7 +136,7 @@ public class ValidationUtils {
             System.out.print(prompt);
             input = scanner.nextLine().trim();
             if (isValidTextField(input)) {
-                System.out.println("❌ " + fieldName + " must be at least 3 characters and contain letters (not only numbers).");
+                System.out.println("âŒ " + fieldName + " must be at least 3 characters and contain letters (not only numbers).");
 
             }
         } while (isValidTextField(input));
@@ -151,7 +151,7 @@ public class ValidationUtils {
             System.out.print(prompt);
             input = scanner.nextLine().trim();
             if (isValidString(input)) {
-                System.out.println("❌ Invalid input! Please enter a valid value.");
+                System.out.println("âŒ Invalid input! Please enter a valid value.");
             }
         } while (isValidString(input));
         return input;
@@ -169,7 +169,7 @@ public class ValidationUtils {
                 value = Integer.parseInt(input);
                 break;
             } else {
-                System.out.println("❌ Invalid input! Please enter a positive number.");
+                System.out.println("âŒ Invalid input! Please enter a positive number.");
             }
         }
         return value;
@@ -184,7 +184,7 @@ public class ValidationUtils {
             System.out.print(prompt);
             date = scanner.nextLine().trim();
             if (isValidDate(date)) {
-                System.out.println("❌ Invalid date! Use format YYYY-MM-DD.");
+                System.out.println("âŒ Invalid date! Use format YYYY-MM-DD.");
             }
         } while (isValidDate(date));
         return date;
@@ -203,10 +203,10 @@ public class ValidationUtils {
                 if (isValidChoice(choice, min, max)) {
                     break;
                 } else {
-                    System.out.printf("❌ Please enter a number between %d and %d.%n", min, max);
+                    System.out.printf("âŒ Please enter a number between %d and %d.%n", min, max);
                 }
             } else {
-                System.out.println("❌ Invalid input! Please enter a number.");
+                System.out.println("âŒ Invalid input! Please enter a number.");
             }
         }
         return choice;

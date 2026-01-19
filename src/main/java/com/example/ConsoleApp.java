@@ -1,21 +1,21 @@
-package main.java.com.example;
+﻿package com.example;
 
-import main.java.com.example.interfaces.TaskFilter;
-import main.java.com.example.interfaces.TaskFilters;
-import main.java.com.example.models.*;
-import main.java.com.example.services.*;
-import main.java.com.example.utils.ConsoleMenu;
-import main.java.com.example.utils.SessionManager;
-import main.java.com.example.utils.ValidationUtils;
-import main.java.com.example.models.HardwareProject;
-import main.java.com.example.services.ConcurrencyService;
+import com.example.interfaces.TaskFilter;
+import com.example.interfaces.TaskFilters;
+import com.example.models.*;
+import com.example.services.*;
+import com.example.utils.ConsoleMenu;
+import com.example.utils.SessionManager;
+import com.example.utils.ValidationUtils;
+import com.example.models.HardwareProject;
+import com.example.services.ConcurrencyService;
 import org.w3c.dom.ls.LSOutput;
 
 import java.sql.SQLOutput;
 import java.util.List;
 import java.util.Map;
-import main.java.com.example.models.Project;
-import main.java.com.example.models.Task;
+import com.example.models.Project;
+import com.example.models.Task;
 import java.util.Scanner;
 
 public class ConsoleApp {
@@ -392,7 +392,7 @@ public class ConsoleApp {
         System.out.println("=== Simulating Parallel Stream Updates ===");
         concurrencyService.simulateParallelStreamUpdates();
 
-        System.out.println("✔ Simulation complete.");
+        System.out.println("âœ” Simulation complete.");
 
         menu.pause();
 

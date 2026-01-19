@@ -1,8 +1,8 @@
+﻿
+package com.example.interfaces;
 
-package main.java.com.example.interfaces;
-
-import main.java.com.example.models.Task;
-import main.java.com.example.utils.FunctionalUtils;
+import com.example.models.Task;
+import com.example.utils.FunctionalUtils;
 
 import java.time.LocalDate;
 import java.util.Locale;

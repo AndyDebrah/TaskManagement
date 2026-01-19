@@ -1,4 +1,4 @@
-package main.java.com.example.models;
+﻿package com.example.models;
 
 /** Hardware development project implementation. */
 public class HardwareProject extends Project {
@@ -28,6 +28,9 @@ public class HardwareProject extends Project {
 
     @Override
     public double calculateCompletionPercentage() {
+        double taskBased = calculateCompletionFromTasks();
+        if (taskBased > 0) return taskBased;
+
         if (totalComponents == 0) return 0.0;
         double componentProgress = (assembledComponents * 80.0) / totalComponents;
         double prototypeProgress = prototypeCompleted ? 20.0 : 0.0;

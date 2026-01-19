@@ -1,7 +1,7 @@
+﻿
+package com.example.models;
 
-package main.java.com.example.models;
-
-import main.java.com.example.interfaces.Completable;
+import com.example.interfaces.Completable;
 
 /** Task model representing individual tasks within projects. */
 public class Task implements Completable {

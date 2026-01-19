@@ -1,6 +1,6 @@
-package main.java.com.example.utils;
+﻿package com.example.utils;
 
-import main.java.com.example.models.Task;
+import com.example.models.Task;
 
 import java.util.List;
 import java.util.Objects;

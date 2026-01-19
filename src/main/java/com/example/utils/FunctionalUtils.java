@@ -1,8 +1,8 @@
+﻿
+package com.example.utils;
 
-package main.java.com.example.utils;
-
-import main.java.com.example.models.Project;
-import main.java.com.example.models.Task;
+import com.example.models.Project;
+import com.example.models.Task;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -81,7 +81,7 @@ public final class FunctionalUtils {
     // Predicates (Project)
     // ---------------------------------------------------------------------
 
-    /** Project completion ≥ threshold (0..100). */
+    /** Project completion â‰¥ threshold (0..100). */
     public static Predicate<Project> completionAtLeast(double thresholdPercent) {
         return p -> p != null && p.calculateCompletionPercentage() >= thresholdPercent;
     }
