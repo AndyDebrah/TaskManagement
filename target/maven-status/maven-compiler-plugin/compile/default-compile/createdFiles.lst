@@ -1,0 +1,16 @@
+models/User.class
+models/SoftwareProject.class
+models/AdminUser.class
+models/RegularUser.class
+interfaces/Completable.class
+RunReports.class
+utils/ConsoleMenu.class
+models/StatusReport.class
+services/ReportService.class
+models/HardwareProject.class
+Main.class
+models/Task.class
+models/Project.class
+services/ProjectServices.class
+utils/ValidationUtils.class
+services/TaskService.class
