@@ -11,15 +11,6 @@ public class RegularUser extends User {
         this.tasksAssigned = 0;
         this.tasksCompleted = 0;
     }
-
-//    public int getTasksAssigned() { return tasksAssigned; }
-//    public void setTasksAssigned(int tasksAssigned) { this.tasksAssigned = tasksAssigned; }
-//    public int getTasksCompleted() { return tasksCompleted; }
-//    public void setTasksCompleted(int tasksCompleted) { this.tasksCompleted = tasksCompleted; }
-//
-//    public void assignTask() { tasksAssigned++; }
-//    public void completeTask() { tasksCompleted++; }
-
     public double getProductivityRate() {
         if (tasksAssigned == 0) return 0.0;
         return (tasksCompleted * 100.0) / tasksAssigned;

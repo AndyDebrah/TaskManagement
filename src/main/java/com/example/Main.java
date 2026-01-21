@@ -1,5 +1,14 @@
 package com.example;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Scanner;
+
+import com.example.models.Project;
+import com.example.models.Task;
 import com.example.services.ConcurrencyService;
 import com.example.services.ProjectService;
 import com.example.services.ReportService;
@@ -8,30 +17,36 @@ import com.example.utils.ConsoleMenu;
 import com.example.utils.FileUtils;
 import com.example.utils.Seed;
 import com.example.utils.SessionManager;
-import com.example.models.Project;
-import com.example.models.Task;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Scanner;
 
 public class Main {
 
-    public static void main(String[] args) { // âœ… proper entrypoint
-        Path dataFile = Paths.get("data", "projects_data.json");
+    public static void main(String[] args) {
+        Path dataFile = Paths.get(System.getProperty("user.dir"))
+            .resolve(Paths.get("data", "projects_data.json"))
+            .normalize();
+        System.out.printf("Data file resolved to: %s (exists=%s)%n", dataFile.toAbsolutePath(), Files.exists(dataFile));
 
-        // Phase 3: Load from file (fallback to Seed)
         FileUtils.LoadResult loaded = FileUtils.load(dataFile);
+        int loadedProjectCount = loaded.projects == null ? 0 : loaded.projects.length;
+        int loadedTaskCount = loaded.tasks == null ? 0 : loaded.tasks.length;
+        System.out.printf("Loaded from file -> projects: %d, tasks: %d%n", loadedProjectCount, loadedTaskCount);
+        if (loadedProjectCount > 0) {
+            System.out.println("Project IDs from file: " + Arrays.stream(loaded.projects)
+                .filter(Objects::nonNull)
+                .map(Project::getProjectId)
+                .toList());
+        }
+        if (loadedTaskCount > 0) {
+            System.out.println("Task IDs from file: " + Arrays.stream(loaded.tasks)
+                .filter(Objects::nonNull)
+                .map(Task::getTaskId)
+                .toList());
+        }
 
-        // --- One-time sanitation to avoid TSK* objects in ProjectService ---
         Project[] cleanedProjects = Arrays.stream(loaded.projects == null ? new Project[0] : loaded.projects)
                 .filter(Objects::nonNull)
                 .filter(p -> p.getProjectId() != null && p.getProjectId().startsWith("PRJ"))
                 .toArray(Project[]::new);
-
-        // Log anything that was skipped (helps you spot lingering TSK entries)
         Arrays.stream(loaded.projects == null ? new Project[0] : loaded.projects)
                 .filter(Objects::nonNull)
                 .filter(p -> p.getProjectId() == null || !p.getProjectId().startsWith("PRJ"))
@@ -42,23 +57,20 @@ public class Main {
         final TaskService taskService;
 
         if (cleanedProjects.length > 0) {
-            projectService = new ProjectService(cleanedProjects); // âœ… only PRJ* here
-            taskService = new TaskService(loaded.tasks, projectService); // seed tasks
+            projectService = new ProjectService(cleanedProjects);
+            taskService = new TaskService(loaded.tasks, projectService);
             System.out.printf("Loaded %d project(s) and %d task(s) from file.%n",
                     projectService.getProjectCount(), taskService.getTaskCount());
         } else {
-            // Fallback to seed when file is empty or fully rejected by guards
-            // TODO: replace with seedProjects()
             projectService = new ProjectService(Seed.seedProjects());
-            // TODO: replace with seedTasks()
             taskService = new TaskService(Seed.seedTasks(), projectService);
             System.out.println("No persisted data found. Seeded initial projects and tasks.");
         }
-
-        // (Optional) Ensure TaskService registry mirrors what's inside each project
         for (Project p : projectService.getAllProjects()) {
             for (Task t : p.getTasks()) {
-                taskService.addTask(t);
+                if (taskService.findTaskById(t.getTaskId()) == null) {
+                    taskService.addTask(t);
+                }
             }
         }
 
@@ -73,7 +85,6 @@ public class Main {
                 concurrencyService);
         app.runApplication();
 
-        // Phase 3: Save on exit
         try {
             FileUtils.save(projectService, dataFile);
             System.out.printf("âœ… Saved %d project(s) to %s%n", projectService.getProjectCount(), dataFile);

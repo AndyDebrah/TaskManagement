@@ -1,6 +1,11 @@
 package com.example.utils;
 
-import com.example.models.*;
+import com.example.models.AdminUser;
+import com.example.models.HardwareProject;
+import com.example.models.Project;
+import com.example.models.RegularUser;
+import com.example.models.SoftwareProject;
+import com.example.models.Task;
 
 public class Seed {
 
@@ -66,14 +71,6 @@ public class Seed {
         Task task3 = new Task("TSK0003", "PROJ003", "Integrate Payment Gateway",
                 "Add Stripe payment processing", "USR001", "High", "2025-01-21");
         tasks[2] = task3;
-//        Task task4 = new Task("TSK0004", "PROJ004", "Setup Firebase Backend",
-//                "Configure Firebase authentication and database", "USR003", "Medium", "2025-02-05");
-//        task4.setStatus("Completed");
-//        tasks[3] = task4;
-//        Task task5 = new Task("TSK0005", "PROJ005", "PCB Design Review",
-//                "Review and finalize circuit board design", "USR002", "High", "2025-03-02");
-//      tasks[4] = task5;
-
         return tasks;
     }
 

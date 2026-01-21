@@ -1,9 +1,5 @@
 package com.example.utils;
 
-import com.example.models.Project;
-import com.example.models.Task;
-import com.example.services.ProjectService;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -11,10 +7,21 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import com.example.exceptions.FilePersistenceException;
+import com.example.models.Project;
+import com.example.models.Task;
+import com.example.services.ProjectService;
 
 /**
  * File persistence utilities (Phase 3).
@@ -77,6 +84,9 @@ public class FileUtils {
                 StandardOpenOption.TRUNCATE_EXISTING,
                 StandardOpenOption.WRITE)) {
             writer.write(content);
+        }
+        catch (IOException e) {
+            throw FilePersistenceException.forWriteFailure(file.toString(), e);
         }
     }
 
@@ -169,7 +179,6 @@ public class FileUtils {
      * =======================================================================
      */
 
-    // Simple key-value patterns
     private static final Pattern STRING_FIELD = Pattern.compile("\"([a-zA-Z][a-zA-Z0-9]*)\"\\s*:\\s*\"(.*?)\"");
     private static final Pattern NUMBER_FIELD = Pattern
             .compile("\"([a-zA-Z][a-zA-Z0-9]*)\"\\s*:\\s*([0-9]+(?:\\.[0-9]+)?)");
@@ -192,7 +201,7 @@ public class FileUtils {
         for (String projectBlock : projectBlocks) {
             Map<String, String> pf = extractFields(projectBlock);
 
-            String projectId = pf.getOrDefault("id", "");
+            String projectId = firstField(projectBlock, "id");
             String name = pf.getOrDefault("name", "");
             String type = pf.getOrDefault("type", "Generic");
             String desc = pf.getOrDefault("description", "");
@@ -202,14 +211,12 @@ public class FileUtils {
             double budget = toDouble(pf.get("budget"), 0.0);
             int teamSize = toInt(pf.get("teamSize"), 0);
 
-            // Construct a load-time concrete project (task-based completion).
             Project project = ProjectFactory.create(projectId, name, desc, startDate, endDate, budget, teamSize, status,
                     type);
             if (project == null)
                 continue;
             loadedProjects.add(project);
 
-            // Extract & parse this project's tasks
             String tasksSection = extractArray(projectBlock, "tasks");
             if (tasksSection == null || tasksSection.isBlank())
                 continue;
@@ -219,10 +226,9 @@ public class FileUtils {
                 Map<String, String> tf = extractFields(taskBlock);
 
                 String jsonTaskId = tf.getOrDefault("id", "");
-                String jsonProjId = tf.getOrDefault("projectId", ""); // exact key & case
+                String jsonProjId = tf.getOrDefault("projectId", "");
                 String resolvedPid = jsonProjId.isBlank() ? projectId : jsonProjId;
 
-                // Skip malformed tasks
                 if (resolvedPid.isBlank())
                     continue;
 
@@ -234,7 +240,6 @@ public class FileUtils {
                 String dueDate = tf.getOrDefault("dueDate", "");
                 String tStatus = tf.getOrDefault("status", "Pending");
 
-                // Use 7-arg constructor to preserve taskId from JSON
                 Task task = new Task(
                         jsonTaskId,
                         resolvedPid,
@@ -261,7 +266,6 @@ public class FileUtils {
      * =======================================================================
      */
 
-    // Extract the "[ ... ]" for a named array field: "projects": [ ... ]
     private static String extractArray(String raw, String arrayName) {
         int idx = raw.indexOf("\"" + arrayName + "\"");
         if (idx < 0)
@@ -277,7 +281,6 @@ public class FileUtils {
         for (int i = start; i < raw.length(); i++) {
             char c = raw.charAt(i);
 
-            // flip quote state if not escaped
             if (c == '"' && (i == 0 || raw.charAt(i - 1) != '\\')) {
                 inQuotes = !inQuotes;
             }
@@ -295,7 +298,6 @@ public class FileUtils {
         return null;
     }
 
-    // Split ONLY top-level objects within an array: { ... }, { ... }, ...
     private static List<String> splitTopLevelObjects(String arrayContent) {
         List<String> objects = new ArrayList<>();
         if (arrayContent == null || arrayContent.isBlank())
@@ -329,7 +331,6 @@ public class FileUtils {
         return objects;
     }
 
-    // Extract all string/number fields in a block
     private static Map<String, String> extractFields(String block) {
         Map<String, String> map = new HashMap<>();
 
@@ -362,6 +363,17 @@ public class FileUtils {
         }
     }
 
+    private static String firstField(String block, String key) {
+        if (block == null || key == null) return "";
+        Matcher m = STRING_FIELD.matcher(block);
+        while (m.find()) {
+            if (key.equals(m.group(1))) {
+                return m.group(2);
+            }
+        }
+        return "";
+    }
+
     private static String toTitleCase(String s) {
         if (s == null || s.isBlank())
             return s;
@@ -384,8 +396,6 @@ public class FileUtils {
                               String startDate, String endDate,
                               double budget, int teamSize,
                               String status, String type) {
-            // If you want: branch to SoftwareProject/HardwareProject based on "type".
-            // Currently we use a simple generic implementation with task-based completion.
             return new SimpleProject(id, name, desc, startDate, endDate, budget, teamSize, status, type);
         }
     }

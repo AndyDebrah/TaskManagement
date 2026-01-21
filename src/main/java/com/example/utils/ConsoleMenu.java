@@ -118,9 +118,6 @@ public class ConsoleMenu {
         System.out.println("======================================================================\n");
     }
 
-
-
-    // In ConsoleMenu.java (add this method)
     public int[] promptConcurrencyParams() {
         System.out.println();
         System.out.println("=== Concurrent Updates Parameters ===");
@@ -136,7 +133,6 @@ public class ConsoleMenu {
     public void pause() {
         System.out.println();
         System.out.println("Press Enter to continue...");
-        // use the shared scanner provided by Main
         scanner.nextLine();
     }
 

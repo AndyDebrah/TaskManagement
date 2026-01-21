@@ -11,12 +11,6 @@ public class AdminUser extends User {
         this.projectsCreated = 0;
         this.usersManaged = 0;
     }
-
-//    public int getProjectsCreated() { return projectsCreated; }
-//    public void incrementProjectsCreated() { this.projectsCreated++; }
-//    public int getUsersManaged() { return usersManaged; }
-//    public void setUsersManaged(int usersManaged) { this.usersManaged = usersManaged; }
-
     @Override
     public String[] getPermissions() {
         return new String[]{
@@ -29,7 +23,7 @@ public class AdminUser extends User {
 
     @Override
     public boolean hasPermission(String action) {
-        return true; // Admins have all permissions
+        return true;
     }
 
     @Override

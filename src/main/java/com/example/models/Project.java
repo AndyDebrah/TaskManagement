@@ -19,7 +19,6 @@ public abstract class Project {
     private final double budget;
     private final int teamSize;
 
-    // Phase 1: replace array storage with List
     private final List<Task> tasks = new ArrayList<>();
 
     private String generateProjectId() {
@@ -39,9 +38,6 @@ public abstract class Project {
 
     }
 
-
-
-    // ADD this constructor alongside the existing one:
     protected Project(String projectId, String projectName, String description,
                       String startDate, String endDate, double budget, int teamSize, String status) {
         this.projectId  = (projectId == null || projectId.trim().isEmpty()) ? generateProjectId() : projectId;
@@ -52,25 +48,18 @@ public abstract class Project {
         this.description = description;
         this.endDate = endDate;
         this.status = status;
-        // Explicit ID for persistence loading
         if (projectId == null || projectId.trim().isEmpty()) {
-            // fallback to generated if missing
-            // (you could also throw if you prefer strictness)
             projectId = String.format("PRJ%04d", projectCounter++);
         }
-        // initialize fields
-        // (copy same assignment order as your existing constructor)
         try {
             java.lang.reflect.Field f = Project.class.getDeclaredField("projectId");
             f.setAccessible(true);
             f.set(this, projectId);
         } catch (ReflectiveOperationException e) {
-            // If reflection is not desired, you can refactor the original class to set projectId directly.
             throw new IllegalStateException("Unable to set projectId for persisted load", e);
         }
         this.setProjectName(projectName);
         this.setDescription(description);
-        // startDate is final: we need to assign via reflection similarly
         try {
             java.lang.reflect.Field fStart = Project.class.getDeclaredField("startDate");
             fStart.setAccessible(true);
@@ -81,7 +70,6 @@ public abstract class Project {
         this.setEndDate(endDate);
         this.setStatus((status == null || status.isBlank()) ? "Active" : status);
 
-        // budget/teamSize are final: set via reflection
         try {
             java.lang.reflect.Field fBudget = Project.class.getDeclaredField("budget");
             fBudget.setAccessible(true);
@@ -93,7 +81,6 @@ public abstract class Project {
             throw new IllegalStateException("Unable to set budget/teamSize for persisted load", e);
         }
     }
-
 
     public String getProjectId() { return projectId; }
 
@@ -134,8 +121,6 @@ public abstract class Project {
                 projectId, projectName, getProjectType(), status, calculateCompletionPercentage());
     }
 
-    // -------- Phase 1: Collections + Streams ----------
-
     /** Add task if ID is unique within this project. */
     public synchronized void  addTask(Task task) {
         Objects.requireNonNull(task, "task");
@@ -148,22 +133,18 @@ public abstract class Project {
         tasks.removeIf(t -> t.getTaskId().equals(taskId));
     }
 
-    /** New: find by ID using Streams. */
     public synchronized Optional<Task> findTaskById(String taskId) {
         return tasks.stream().filter(t -> t.getTaskId().equals(taskId)).findFirst();
     }
 
-    /** New: expose task stream for functional operations. */
     public Stream<Task> streamTasks() {
         return tasks.stream();
     }
 
-    /** Backwards-compatible: still returns an array for callers that expect it. */
     public Task[] getTasks() {
         return tasks.toArray(new Task[0]);
     }
 
-    /** Equality by immutable identifier for correct behavior in collections. */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

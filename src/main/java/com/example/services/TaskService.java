@@ -1,24 +1,26 @@
 
 package com.example.services;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import com.example.exceptions.InvalidInputException;
+import com.example.exceptions.ProjectNotFoundException;
+import com.example.exceptions.TaskNotFoundException;
 import com.example.models.Project;
 import com.example.models.Task;
-import com.example.exceptions.TaskNotFoundException;
-import com.example.exceptions.ProjectNotFoundException;
-import com.example.exceptions.InvalidInputException;
 import com.example.utils.ValidationUtils;
-
-import java.util.HashMap;
-import java.util.Map;
 
 
 
 /** Service class for managing task operations. */
 public class TaskService {
-    // Phase 1: replace array storage with a map (fast ID lookup)
-    private final Map<String, Task> tasksById = new HashMap<>();
+    private final Map<String, Task> tasksById = new ConcurrentHashMap<>();
     private static final int MAX_TASKS = 500;
     private static int taskCounter = 4;
+
+    private final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
 
     private ProjectService projectService;
 
@@ -50,15 +52,9 @@ public class TaskService {
         this.projectService = projectService;
     }
 
-    public synchronized void addTask(Task task) {
-        if (tasksById.size() >= MAX_TASKS) {
-            throw new InvalidInputException("Error: Maximum task limit reached!");
-        }
+    public void addTask(Task task) {
         if (task == null) {
             throw new InvalidInputException("Task must not be null.");
-        }
-        if (tasksById.containsKey(task.getTaskId())) {
-            throw new InvalidInputException("Error: Task ID already exists!");
         }
 
         ValidationUtils.requireValidTaskId(task.getTaskId());
@@ -72,7 +68,17 @@ public class TaskService {
             throw new ProjectNotFoundException(task.getProjectId());
         }
 
-        tasksById.put(task.getTaskId(), task);
+        rwLock.writeLock().lock();
+        try {
+            if (tasksById.size() >= MAX_TASKS) {
+                throw new InvalidInputException("Error: Maximum task limit reached!");
+            }
+            if (tasksById.putIfAbsent(task.getTaskId(), task) != null) {
+                throw new InvalidInputException("Error: Task ID already exists!");
+            }
+        } finally {
+            rwLock.writeLock().unlock();
+        }
         project.addTask(task);
     }
 
@@ -80,12 +86,11 @@ public class TaskService {
         return tasksById.get(taskId);
     }
 
-    public synchronized void updateTask(String taskId, Task updatedTask) {
+    public void updateTask(String taskId, Task updatedTask) {
         Task existing = tasksById.get(taskId);
         if (existing == null) {
             throw new TaskNotFoundException(taskId);
         }
-
 
         ValidationUtils.requireNonEmpty(updatedTask.getTaskId(), "Task ID");
         ValidationUtils.requireNonEmpty(updatedTask.getProjectId(), "Project ID");
@@ -95,7 +100,6 @@ public class TaskService {
         ValidationUtils.requireValidPriority(updatedTask.getPriority());
         ValidationUtils.requireNonEmpty(updatedTask.getDueDate(), "Due Date");
         ValidationUtils.requireValidStatus(updatedTask.getStatus());
-
 
         if (existing.getProjectId().equals(updatedTask.getProjectId())) {
             existing.setStatus(updatedTask.getStatus());
@@ -111,7 +115,6 @@ public class TaskService {
         Project newProject = projectService.findProjectById(updatedTask.getProjectId());
 
         if (newProject == null) {
-            // Do NOT break → just update status and stay in old project
             existing.setStatus(updatedTask.getStatus());
             tasksById.put(taskId, existing);
 
@@ -123,8 +126,25 @@ public class TaskService {
             return;
         }
 
-        if (oldProject != null) oldProject.removeTask(taskId);
-        newProject.addTask(existing);
+        Project first = oldProject != null && oldProject.getProjectId().compareTo(newProject.getProjectId()) <= 0
+                ? oldProject : newProject;
+        Project second = (first == oldProject) ? newProject : oldProject;
+
+        if (first != null) {
+            synchronized (first) {
+                if (second != null && second != first) {
+                    synchronized (second) {
+                        if (oldProject != null) oldProject.removeTask(taskId);
+                        newProject.addTask(existing);
+                    }
+                } else {
+                    if (oldProject != null) oldProject.removeTask(taskId);
+                    newProject.addTask(existing);
+                }
+            }
+        } else {
+            newProject.addTask(existing);
+        }
 
         existing.setStatus(updatedTask.getStatus());
         tasksById.put(taskId, existing);
@@ -136,7 +156,7 @@ public class TaskService {
 
 
 
-    public synchronized void deleteTask(String taskId) {
+    public void deleteTask(String taskId) {
         Task removed = tasksById.remove(taskId);
         if (removed == null) {
             throw new TaskNotFoundException(taskId);
@@ -151,8 +171,6 @@ public class TaskService {
             throw new ProjectNotFoundException(removed.getProjectId());
         }
     }
-
-    // -------- Backwards-compatible return types (arrays) --------
 
     public Task[] getAllTasks() {
         return tasksById.values().toArray(new Task[0]);

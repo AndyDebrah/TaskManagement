@@ -1,21 +1,22 @@
 
 package com.example.services;
 
-import com.example.models.Project;
-import com.example.exceptions.InvalidProjectDataException;
-import com.example.exceptions.ProjectNotFoundException;
-import com.example.utils.ValidationUtils;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import com.example.exceptions.InvalidProjectDataException;
+import com.example.exceptions.ProjectNotFoundException;
+import com.example.models.Project;
+import com.example.utils.ValidationUtils;
 
 /** Service class for managing project operations (in-memory). */
 public class ProjectService {
-    // Phase 1: replace array storage with HashMap catalog
-    private final Map<String, Project> projects = new HashMap<>();
+    private final Map<String, Project> projects = new ConcurrentHashMap<>();
     private static final int MAX_PROJECTS = 100;
+    private final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
 
     public ProjectService(Project[] seededProjects) {
         if (seededProjects != null) {
@@ -30,39 +31,50 @@ public class ProjectService {
         }
     }
 
-    public synchronized void addProject(Project project) {
-        if (projects.size() >= MAX_PROJECTS) {
-            throw new InvalidProjectDataException("Error: Maximum project limit reached!");
-        }
+    public void addProject(Project project) {
         if (project == null) {
             throw new InvalidProjectDataException("Error: Project data cannot be null!");
         }
-        if (projects.containsKey(project.getProjectId())) {
-            throw new InvalidProjectDataException("Error: Project ID already exists!");
-        }
         ValidationUtils.requireValidProjectId(project.getProjectId());
         validateProjectData(project);
-        projects.put(project.getProjectId(), project);
+
+        rwLock.writeLock().lock();
+        try {
+            if (projects.size() >= MAX_PROJECTS) {
+                throw new InvalidProjectDataException("Error: Maximum project limit reached!");
+            }
+            if (projects.putIfAbsent(project.getProjectId(), project) != null) {
+                throw new InvalidProjectDataException("Error: Project ID already exists!");
+            }
+        } finally {
+            rwLock.writeLock().unlock();
+        }
     }
 
     public Project findProjectById(String projectId) {
         return projects.get(projectId);
     }
 
-    public synchronized void updateProject(String projectId, Project updatedProject) {
-        if (!projects.containsKey(projectId)) {
-            throw new ProjectNotFoundException(projectId);
-        }
-
-
+    public void updateProject(String projectId, Project updatedProject) {
         ValidationUtils.requireValidProjectId(updatedProject.getProjectId());
         validateProjectData(updatedProject);
-        projects.put(projectId, updatedProject);
+
+        projects.compute(projectId, (id, existing) -> {
+            if (existing == null) {
+                throw new ProjectNotFoundException(id);
+            }
+            return updatedProject;
+        });
     }
 
-    public synchronized void deleteProject(String projectId) {
-        if (projects.remove(projectId) == null) {
-            throw new ProjectNotFoundException(projectId);
+    public void deleteProject(String projectId) {
+        rwLock.writeLock().lock();
+        try {
+            if (projects.remove(projectId) == null) {
+                throw new ProjectNotFoundException(projectId);
+            }
+        } finally {
+            rwLock.writeLock().unlock();
         }
     }
 
@@ -81,8 +93,6 @@ public class ProjectService {
             throw new InvalidProjectDataException("Error: Budget cannot be negative!");
         }
     }
-
-    // -------- Backwards-compatible return types (arrays) --------
 
     public Project[] getAllProjects() {
         List<Project> list = new ArrayList<>(projects.values());

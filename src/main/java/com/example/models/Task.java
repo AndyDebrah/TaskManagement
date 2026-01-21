@@ -78,7 +78,6 @@ public class Task implements Completable {
         return String.format("Task[ID=%s, Name=%s, Status=%s, Priority=%s]", taskId, taskName, status, priority);
     }
 
-    // Phase 1: equality by stable identifier, needed for List/Map behavior
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

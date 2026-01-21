@@ -1,15 +1,26 @@
 
 package com.example.utils;
 
-import com.example.models.Project;
-import com.example.models.Task;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.*;
-import java.util.function.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.ToDoubleFunction;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+
+import com.example.models.Project;
+import com.example.models.Task;
 
 /**
  * Functional helper methods (predicates, mappers, comparators, collectors)
@@ -20,9 +31,6 @@ public final class FunctionalUtils {
 
     private FunctionalUtils() { }
 
-    // ---------------------------------------------------------------------
-    // Predicates (Task)
-    // ---------------------------------------------------------------------
 
     /** Task is completed (status == "Completed"). */
     public static Predicate<Task> isCompletedTask() {
@@ -77,19 +85,22 @@ public final class FunctionalUtils {
                 .orElse(false);
     }
 
-    // ---------------------------------------------------------------------
-    // Predicates (Project)
-    // ---------------------------------------------------------------------
 
     /** Project completion ≥ threshold (0..100). */
     public static Predicate<Project> completionAtLeast(double thresholdPercent) {
         return p -> p != null && p.calculateCompletionPercentage() >= thresholdPercent;
     }
 
-    /** Project considered completed when completionPercentage >= 100.0. */
+    /**
+     * Project considered completed when either status is "Completed" (case-insensitive)
+     * OR calculated completionPercentage >= 100.0. This keeps semantic compatibility with
+     * tests that mark status without forcing a full 100% task completion.
+     */
     public static Predicate<Project> isCompletedProject() {
-        // Use calculateCompletionPercentage() for robustness across builds
-        return p -> p != null && p.calculateCompletionPercentage() >= 100.0;
+        return p -> p != null && (
+                "Completed".equalsIgnoreCase(p.getStatus())
+                || p.calculateCompletionPercentage() >= 100.0
+        );
     }
 
     /** Project name contains token (case-insensitive). */
@@ -115,9 +126,6 @@ public final class FunctionalUtils {
         return p -> p != null && Arrays.stream(p.getTasks()).anyMatch(taskPredicate);
     }
 
-    // ---------------------------------------------------------------------
-    // Mappers
-    // ---------------------------------------------------------------------
 
     public static Function<Task, String> toTaskId()      { return t -> t == null ? null : t.getTaskId(); }
     public static Function<Task, String> toTaskName()    { return t -> t == null ? null : t.getTaskName(); }
@@ -130,9 +138,6 @@ public final class FunctionalUtils {
     public static Function<Project, String> toProjectName(){ return p -> p == null ? null : p.getProjectName(); }
     public static ToDoubleFunction<Project> toCompletion(){ return p -> p == null ? 0.0 : p.calculateCompletionPercentage(); }
 
-    // ---------------------------------------------------------------------
-    // Comparators
-    // ---------------------------------------------------------------------
 
     /** Compare tasks by name ASC, nulls last, case-insensitive. */
     public static Comparator<Task> byTaskNameAscNullsLast() {
@@ -144,7 +149,7 @@ public final class FunctionalUtils {
     public static Comparator<Task> byPriorityThenName() {
         return Comparator
                 .comparingInt((Task t) -> priorityRank(t == null ? null : t.getPriority()))
-                .reversed() // High (3) first
+                .reversed()
                 .thenComparing(byTaskNameAscNullsLast());
     }
 
@@ -154,7 +159,7 @@ public final class FunctionalUtils {
             Optional<LocalDate> da = parseIsoDate(a == null ? null : a.getDueDate());
             Optional<LocalDate> db = parseIsoDate(b == null ? null : b.getDueDate());
             if (da.isEmpty() && db.isEmpty()) return 0;
-            if (da.isEmpty()) return 1; // nulls last
+            if (da.isEmpty()) return 1;
             if (db.isEmpty()) return -1;
             return da.get().compareTo(db.get());
         };
@@ -175,9 +180,6 @@ public final class FunctionalUtils {
                 Comparator.nullsLast(String::compareTo));
     }
 
-    // ---------------------------------------------------------------------
-    // Collectors / Aggregations
-    // ---------------------------------------------------------------------
 
     /** Count tasks by status; null status grouped as "Unknown". */
     public static Collector<Task, ?, Map<String, Long>> countByStatus() {
@@ -217,9 +219,6 @@ public final class FunctionalUtils {
                 .average().orElse(0.0);
     }
 
-    // ---------------------------------------------------------------------
-    // Combinators / Utilities
-    // ---------------------------------------------------------------------
 
     /** Negate a predicate (null-safe). */
     public static <T> Predicate<T> not(Predicate<T> p) {
@@ -251,9 +250,6 @@ public final class FunctionalUtils {
         };
     }
 
-    // ---------------------------------------------------------------------
-    // Internal helpers
-    // ---------------------------------------------------------------------
 
     /** Priority ranking: High=3, Medium=2, Low=1, others/null=0. */
     private static int priorityRank(String p) {

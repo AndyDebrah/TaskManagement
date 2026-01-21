@@ -1,12 +1,7 @@
 package com.example.utils;
-import com.example.exceptions.InvalidInputException;
-
-import com.example.utils.RegexValidator;
-import com.example.exceptions.InvalidInputException;
-
-
-
 import java.util.Scanner;
+
+import com.example.exceptions.InvalidInputException;
 
 /**
  * Utility class for input validation
@@ -32,7 +27,6 @@ public class ValidationUtils {
             return true;
         }
 
-        // Simple format validation
         String[] parts = date.split("-");
         if (parts.length != 3) {
             return true;

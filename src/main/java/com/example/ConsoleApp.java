@@ -69,7 +69,6 @@ public class ConsoleApp {
             5000.0, 5,
             "Sensor", 10);
 
-    // taskfilter demo
     private void runStreamDemo() {
         TaskFilter filter = t -> t != null
                 && "Completed".equalsIgnoreCase(t.getStatus())
@@ -394,7 +393,6 @@ public class ConsoleApp {
 
     }
 
-    // --- STREAM ANALYTICS HANDLER (paste inside ConsoleApp class) ---
     private void handleStreamAnalytics() {
         boolean inMenu = true;
         while (inMenu) {
@@ -458,7 +456,6 @@ public class ConsoleApp {
                         ValidationUtils.requireValidProjectId(projectId);
                         Project p = projectService.findProjectById(projectId);
 
-                        // Minimal TaskFilter (as per your requirement doc)
                         System.out.print("Filter criteria (leave blank to skip):");
                         String status = scanner.nextLine().trim();
                         if (!status.isBlank()) {

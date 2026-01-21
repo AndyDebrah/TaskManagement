@@ -23,12 +23,9 @@ import com.example.utils.FunctionalUtils;
  */
 public class StreamService {
 
-    // ------------------------ Snapshot helpers ------------------------
-
     /** Null-safe snapshot of a project's tasks as a List. */
     private List<Task> snapshotTasks(Project project) {
         if (project == null) return List.of();
-        // Project.getTasks() returns a fresh array; wrap it as a fixed-size list
         Task[] arr = project.getTasks();
         return arr == null ? List.of() : Arrays.asList(arr);
     }
@@ -39,8 +36,6 @@ public class StreamService {
         Project[] arr = projectService.getAllProjects();
         return arr == null ? List.of() : Arrays.asList(arr);
     }
-
-    // ------------------------ Stream helpers (null-safe) ------------------------
 
     private Stream<Task> streamTasks(Collection<Task> tasks) {
         return tasks == null ? Stream.empty() : tasks.stream().filter(Objects::nonNull);
@@ -66,8 +61,6 @@ public class StreamService {
                 .collect(Collectors.toList());
 
     }
-    // ------------------------ Task operations ------------------------
-
     /** List completed tasks for a project. */
     public List<Task> listCompletedTasks(Project project) {
         return streamTasks(snapshotTasks(project))
@@ -137,8 +130,6 @@ public class StreamService {
                 .findFirst();
     }
 
-    // ------------------------ Project operations (ProjectService source) ------------------------
-
     /** List completed projects from a ProjectService (Project::isCompleted is 100%). */
     public List<Project> listCompletedProjects(ProjectService projectService) {
         return streamProjects(snapshotProjects(projectService))
@@ -166,8 +157,6 @@ public class StreamService {
                 .mapToDouble(Project::calculateCompletionPercentage)
                 .average().orElse(0.0);
     }
-
-    // ------------------------ Project operations (Collections / arrays) ------------------------
 
     /** List completed projects from a collection. */
     public List<Project> listCompletedProjects(List<Project> projects) {
@@ -204,16 +193,12 @@ public class StreamService {
                 .collect(Collectors.toList());
     }
 
-    // ------------------------ Parallel tasks ------------------------
-
     /** Parallel listing of completed tasks (using snapshot + parallel). */
     public List<Task> listCompletedTasksParallel(Project project) {
         return snapshotTasks(project).parallelStream()
                 .filter(FunctionalUtils.isCompletedTask())
                 .collect(Collectors.toList());
     }
-
-    // ------------------------ Convenience overloads for arrays ------------------------
 
     public List<Task> listCompletedTasks(Task[] tasks) {
         return streamTasks(tasks)

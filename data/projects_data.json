@@ -11,6 +11,26 @@
       "budget": 150000.0,
       "teamSize": 12,
       "tasks": [
+        {
+          "id": "TSK0006",
+          "name": "Requirements Gathering",
+          "projectId": "PRJ0005",
+          "description": "Capture and refine mobile banking requirements with stakeholders",
+          "assignedTo": "1",
+          "priority": "high",
+          "status": "completed",
+          "dueDate": "2026-02-15"
+        },
+        {
+          "id": "TSK0007",
+          "name": "API Development",
+          "projectId": "PRJ0005",
+          "description": "Implement secure account and transaction APIs",
+          "assignedTo": "2",
+          "priority": "medium",
+          "status": "Pending",
+          "dueDate": "2026-03-15"
+        }
       ]
     },
     {
@@ -24,6 +44,26 @@
       "budget": 100000.0,
       "teamSize": 10,
       "tasks": [
+        {
+          "id": "TSK0008",
+          "name": "Catalog Setup",
+          "projectId": "PRJ0004",
+          "description": "Populate initial product catalog and categories",
+          "assignedTo": "3",
+          "priority": "medium",
+          "status": "Pending",
+          "dueDate": "2026-02-10"
+        },
+        {
+          "id": "TSK0009",
+          "name": "Payment Integration",
+          "projectId": "PRJ0004",
+          "description": "Integrate payment gateway and handle order checkout flow",
+          "assignedTo": "4",
+          "priority": "high",
+          "status": "Pending",
+          "dueDate": "2026-03-05"
+        }
       ]
     },
     {
@@ -37,6 +77,26 @@
       "budget": 200000.0,
       "teamSize": 8,
       "tasks": [
+        {
+          "id": "TSK0004",
+          "name": "UI",
+          "projectId": "PRJ0006",
+          "description": "build Ui",
+          "assignedTo": "4",
+          "priority": "low",
+          "status": "Pending",
+          "dueDate": "2029-09-09"
+        },
+        {
+          "id": "TSK0005",
+          "name": "Integration Tests",
+          "projectId": "PRJ0006",
+          "description": "Write and run integration tests for core modules",
+          "assignedTo": "2",
+          "priority": "medium",
+          "status": "Pending",
+          "dueDate": "2026-02-28"
+        }
       ]
     }
   ]

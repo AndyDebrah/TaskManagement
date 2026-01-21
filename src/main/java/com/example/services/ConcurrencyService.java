@@ -1,17 +1,20 @@
 
 package com.example.services;
 
-import com.example.models.Project;
-import com.example.models.Task;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
-import java.util.concurrent.*;
-import java.util.stream.Collectors;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import com.example.exceptions.ConcurrencyException;
+import com.example.models.Project;
+import com.example.models.Task;
 
 /**
  * Concurrency demo service for Phase 4.
@@ -30,6 +33,35 @@ public class ConcurrencyService {
         this.taskService = Objects.requireNonNull(taskService);
     }
 
+    private static final class AutoClosingExecutor implements AutoCloseable {
+        private final ExecutorService delegate;
+
+        private AutoClosingExecutor(ExecutorService delegate) {
+            this.delegate = delegate;
+        }
+
+        static AutoClosingExecutor fixedPool(int n) {
+            return new AutoClosingExecutor(Executors.newFixedThreadPool(Math.max(1, n)));
+        }
+
+        ExecutorService get() {
+            return delegate;
+        }
+
+        @Override
+        public void close() {
+            delegate.shutdown();
+            try {
+                if (!delegate.awaitTermination(30, TimeUnit.SECONDS)) {
+                    throw ConcurrencyException.forExecutorShutdownTimeout(30);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw ConcurrencyException.forInterruptedOperation("Executor shutdown");
+            }
+        }
+    }
+
     /**
      * Workflow 4: Simulate Concurrent Updates using ExecutorService (threads).
      * Each worker picks tasks and randomly toggles status or marks completion.
@@ -43,39 +75,31 @@ public class ConcurrencyService {
 
         System.out.printf("Starting concurrent updates: %d worker(s), %d op(s) each%n", workers, opsPerWorker);
 
-        ExecutorService pool = Executors.newFixedThreadPool(Math.max(1, workers));
-        CountDownLatch latch = new CountDownLatch(workers);
-        Instant start = Instant.now();
+        try (AutoClosingExecutor closer = AutoClosingExecutor.fixedPool(workers)) {
+            ExecutorService pool = closer.get();
+            CountDownLatch latch = new CountDownLatch(workers);
+            Instant start = Instant.now();
 
-        for (int w = 0; w < workers; w++) {
-            pool.submit(() -> {
-                try {
-                    for (int i = 0; i < opsPerWorker; i++) {
-                        Task task = allTasks.get(random.nextInt(allTasks.size()));
-                       try {
-                           simulateRandomTaskUpdate(task);
-                       } catch (RuntimeException ex){
-
-                           // Log and continue; do not kill the worker
-                           System.out.printf("Skip task %s due to: %s%n", task.getTaskId(), ex.getMessage());
-
-                       }
-                        // Simulate variable work
-                        sleepQuietly(10 + random.nextInt(40));
+            for (int w = 0; w < workers; w++) {
+                pool.submit(() -> {
+                    try {
+                        for (int i = 0; i < opsPerWorker; i++) {
+                            Task task = allTasks.get(random.nextInt(allTasks.size()));
+                            try {
+                                simulateRandomTaskUpdate(task);
+                            } catch (RuntimeException ex){
+                                System.out.printf("Skip task %s due to: %s%n", task.getTaskId(), ex.getMessage());
+                            }
+                            sleepQuietly(10 + random.nextInt(40));
+                        }
+                    } finally {
+                        latch.countDown();
                     }
-                } finally {
-                    latch.countDown();
-                }
-            });
+                });
+            }
+
+            monitorProgress(latch, start);
         }
-
-        // Progress monitor
-        monitorProgress(latch, start);
-
-        pool.shutdown();
-        try {
-            pool.awaitTermination(10, TimeUnit.SECONDS);
-        } catch (InterruptedException ignored) { Thread.currentThread().interrupt(); }
 
         System.out.println("All workers completed safely.");
         summarizeProgress();
@@ -101,37 +125,29 @@ public class ConcurrencyService {
         summarizeProgress();
     }
 
-    // -------------------- Helpers --------------------
-
     private void simulateRandomTaskUpdate(Task task) {
-        // Randomly choose an operation: mark completed or toggle status
         int choice = random.nextInt(3);
         switch (choice) {
             case 0 -> {
-                // Mark completed
                 task.setStatus("Completed");
-                // Reflect in central store (update under TaskService to keep project association consistent)
                 taskService.updateTask(task.getTaskId(), task);
             }
             case 1 -> {
-                // Toggle to In Progress
                 task.setStatus("In Progress");
                 taskService.updateTask(task.getTaskId(), task);
             }
             default -> {
-                // Toggle to Pending
                 task.setStatus("Pending");
                 taskService.updateTask(task.getTaskId(), task);
             }
         }
     }
-
     private void monitorProgress(CountDownLatch latch, Instant start) {
         int lastRemaining = Integer.MAX_VALUE;
         while (latch.getCount() > 0) {
             long remaining = latch.getCount();
             if (remaining != lastRemaining) {
-                long total = remaining; // We don't know total; report remaining only
+                long total = remaining;
                 long doneWorkers = Math.max(0, lastRemaining == Integer.MAX_VALUE ? 0 : (lastRemaining - remaining));
                 System.out.printf("Progress: %d worker(s) remaining...%n", remaining);
                 lastRemaining = (int) remaining;
@@ -147,7 +163,6 @@ public class ConcurrencyService {
     }
 
     private void summarizeProgress() {
-        // Print per-project completion summary (uses streams)
         List<Project> projects = List.of(projectService.getAllProjects());
         if (projects.isEmpty()) return;
 
